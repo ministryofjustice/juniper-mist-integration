@@ -1,6 +1,10 @@
-import sys, requests, json
+import sys
+import requests
+import json
 
 # Mist CRUD operations
+
+
 class Admin(object):
     def __init__(self, token=''):
         self.session = requests.Session()
@@ -21,7 +25,8 @@ class Admin(object):
             print('Failed to POST')
             print('\tURL: {}'.format(url))
             print('\tPayload: {}'.format(payload))
-            print('\tResponse: {} ({})'.format(response.text, response.status_code))
+            print('\tResponse: {} ({})'.format(
+                response.text, response.status_code))
 
             return False
 
@@ -39,7 +44,8 @@ class Admin(object):
             print('Failed to PUT')
             print('\tURL: {}'.format(url))
             print('\tPayload: {}'.format(payload))
-            print('\tResponse: {} ({})'.format(response.text, response.status_code))
+            print('\tResponse: {} ({})'.format(
+                response.text, response.status_code))
 
             return False
 
@@ -52,8 +58,8 @@ def juniper_script(
         mist_api_token='',
         org_id=''):
 
-    show_more_details = True  # Configure True/False to enable/disable additional logging of the API response objects
-
+    # Configure True/False to enable/disable additional logging of the API response objects
+    show_more_details = True
 
     # Check for required variables
     if mist_api_token == '':
@@ -90,8 +96,6 @@ def juniper_script(
 
         }
 
-
-
         print('Calling the Mist Create Site API...')
         result = admin.post('/api/v1/orgs/' + org_id + '/sites', site)
         if result == False:
@@ -116,7 +120,8 @@ def juniper_script(
         result = admin.put('/api/v1/sites/' + site_id + '/setting',
                            site_setting)
         if result == False:
-            print('Failed to update site setting {} ({})'.format(site['name'], site_id))
+            print('Failed to update site setting {} ({})'.format(
+                site['name'], site_id))
         else:
             print('Updated site setting {} ({})'.format(site['name'], site_id))
 

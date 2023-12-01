@@ -1,5 +1,6 @@
 from juniper import juniper_script
-import os, csv
+import os
+import csv
 from geocode import geocode, find_timezone, find_country_code
 
 
@@ -11,19 +12,20 @@ def csv_to_json(file_path):
         title = reader.fieldnames
 
         for row in reader:
-            csv_rows.extend([ {title[i]: row[title[i]] for i in range(len(title))} ])
+            csv_rows.extend([{title[i]: row[title[i]]
+                            for i in range(len(title))}])
 
     return csv_rows
 
+
 if __name__ == '__main__':
 
-    csv_file_path=os.getcwd() + '/../test_data/sites_with_clients.csv'
+    csv_file_path = os.getcwd() + '/../test_data/sites_with_clients.csv'
 
     # Convert CSV to valid JSON
     data = csv_to_json(csv_file_path)
     if data == None or data == []:
         raise ValueError('Failed to convert CSV file to JSON. Exiting script.')
-
 
     # Create each site from the CSV file
     for d in data:
