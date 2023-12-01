@@ -19,6 +19,7 @@ def convert_csv_to_json(file_path):
         raise ValueError('Failed to convert CSV file to JSON. Exiting script.')
     return csv_rows
 
+
 def add_geocoding_to_json(data):
     for d in data:
         # Variables
@@ -37,14 +38,16 @@ def add_geocoding_to_json(data):
         d['time_zone'] = time_zone
     return data
 
+
 if __name__ == '__main__':
 
-    csv_file_path=os.getcwd() + '/../test_data/sites_with_clients.csv'
+    csv_file_path = os.getcwd() + '/../test_data/sites_with_clients.csv'
 
     # Convert CSV to valid JSON
     json_data_without_geocoding = convert_csv_to_json(csv_file_path)
 
-    json_data_with_geocoding = add_geocoding_to_json(json_data_without_geocoding)
+    json_data_with_geocoding = add_geocoding_to_json(
+        json_data_without_geocoding)
 
     juniper_script(
         mist_api_token=os.environ['MIST_API_TOKEN'],
