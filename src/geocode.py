@@ -7,9 +7,15 @@ def geocode(address) -> str:
     location = geolocator.geocode(address)
     try:
         latitude, longitude = location.latitude, location.longitude
-    except ValueError:
-        raise ValueError(
-            'geocode unable to find latitude & longitude for {address}'.format(address=address))
+    except AttributeError as e:
+        if "'NoneType' object has no attribute 'latitude'" in str(e):
+            raise AttributeError(
+                'geocode unable to find latitude & longitude for {address}'.format(address=address))
+        if "'NoneType' object has no attribute 'longitude'" in str(e):
+            raise AttributeError(
+                'geocode unable to find latitude & longitude for {address}'.format(address=address))
+        else:
+            raise  # Re-raise the original AttributeError if the message doesn't match
     return latitude, longitude
 
 
