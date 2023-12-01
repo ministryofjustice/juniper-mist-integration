@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 from src.juniper import juniper_script, Admin
 
+
 class TestJuniperScript(unittest.TestCase):
 
     @patch('src.juniper.Admin.post')
