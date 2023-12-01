@@ -1,5 +1,6 @@
 from juniper import juniper_script
-import os, csv
+import os
+import csv
 from geocode import geocode, find_timezone, find_country_code
 
 
@@ -11,7 +12,8 @@ def convert_csv_to_json(file_path):
         title = reader.fieldnames
 
         for row in reader:
-            csv_rows.extend([{title[i]: row[title[i]] for i in range(len(title))}])
+            csv_rows.extend([{title[i]: row[title[i]]
+                              for i in range(len(title))}])
 
     if csv_rows == None or csv_rows == []:
         raise ValueError('Failed to convert CSV file to JSON. Exiting script.')
