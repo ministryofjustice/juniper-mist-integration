@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 from src.geocode import geocode
 
+
 class TestGeocode(unittest.TestCase):
 
     @patch('src.geocode.Nominatim.geocode')
@@ -9,9 +10,11 @@ class TestGeocode(unittest.TestCase):
         # Define a list of addresses and their expected results
         addresses = [
             ("40 Mayflower Dr, Plymouth PL2 3DG", (50.3868633, -4.1539256)),
-            ("102 Petty France, London SW1H 9AJ", (51.499929300000005, -0.13477761285315926)),
+            ("102 Petty France, London SW1H 9AJ",
+             (51.499929300000005, -0.13477761285315926)),
             ("London", (51.4893335, -0.14405508452768728)),
-            ("Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB", (50.727350349999995, -3.4744726127760086))
+            ("Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB",
+             (50.727350349999995, -3.4744726127760086))
         ]
         # Mock the geocode method to return the corresponding latitude and longitude
         for address, (lat, lon) in addresses:
@@ -34,5 +37,6 @@ class TestGeocode(unittest.TestCase):
         with self.assertRaises(AttributeError) as context:
             geocode(address)
 
-        expected_error_message = 'geocode unable to find latitude & longitude for {address}'.format(address=address)
+        expected_error_message = 'geocode unable to find latitude & longitude for {address}'.format(
+            address=address)
         self.assertEqual(str(context.exception), expected_error_message)
