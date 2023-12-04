@@ -36,7 +36,7 @@ def find_timezone(gps) -> tuple:
     try:
         timezone_name = tf_init.timezone_at(lat=latitude, lng=longitude)
     except ValueError:
-        raise ValueError('The coordinates were out of bounds {latitude}:{longitude}'.format(
+        raise ValueError('The coordinates were out of bounds {lat}:{lng}'.format(
             lat=latitude, lng=longitude))
     if timezone_name is None:
         raise ValueError('GPS coordinates did not match a time_zone')
