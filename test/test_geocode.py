@@ -55,7 +55,8 @@ class TestGeocode(unittest.TestCase):
     @patch('src.geocode.TimezoneFinder')
     def test_find_timezone_out_of_bounds(self, mock_timezone_finder):
         tf_instance = MagicMock()
-        tf_instance.timezone_at.side_effect = ValueError('The coordinates were out of bounds 40.7128:-74.0060')
+        tf_instance.timezone_at.side_effect = ValueError(
+            'The coordinates were out of bounds 40.7128:-74.0060')
         mock_timezone_finder.return_value = tf_instance
 
         gps_coordinates = (40.7128, -74.0060)
@@ -63,7 +64,8 @@ class TestGeocode(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             find_timezone(gps_coordinates)
 
-        self.assertEqual(str(context.exception), 'The coordinates were out of bounds 40.7128:-74.006')
+        self.assertEqual(str(context.exception),
+                         'The coordinates were out of bounds 40.7128:-74.006')
 
     @patch('src.geocode.TimezoneFinder')
     def test_find_timezone_no_matching_timezone(self, mock_timezone_finder):
@@ -76,7 +78,9 @@ class TestGeocode(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             find_timezone(gps_coordinates)
 
-        self.assertEqual(str(context.exception), 'GPS coordinates did not match a time_zone')
+        self.assertEqual(str(context.exception),
+                         'GPS coordinates did not match a time_zone')
+
 
 class TestFindCountryCode(unittest.TestCase):
     @patch('src.geocode.Nominatim.geocode')
@@ -95,7 +99,8 @@ class TestFindCountryCode(unittest.TestCase):
     @patch('src.geocode.Nominatim.geocode')
     def test_find_country_code_invalid_coordinates(self, mock_nominatim):
         geolocator_instance = MagicMock()
-        geolocator_instance.reverse.side_effect = Exception('Invalid coordinates')
+        geolocator_instance.reverse.side_effect = Exception(
+            'Invalid coordinates')
         mock_nominatim.return_value = geolocator_instance
 
         gps_coordinates = (1000.0, 2000.0)  # Invalid coordinates
@@ -103,4 +108,5 @@ class TestFindCountryCode(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             find_country_code(gps_coordinates)
 
-        self.assertEqual(str(context.exception), 'Must be a coordinate pair or Point')
+        self.assertEqual(str(context.exception),
+                         'Must be a coordinate pair or Point')
