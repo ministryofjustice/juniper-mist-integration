@@ -5,7 +5,7 @@ from geocode import geocode, find_timezone, find_country_code
 
 
 # Convert CSV file to JSON object.
-def csv_to_json(file_path):
+def convert_csv_to_json(file_path):
     csv_rows = []
     with open(file_path) as csvfile:
         reader = csv.DictReader(csvfile, skipinitialspace=True, quotechar='"')
@@ -13,21 +13,14 @@ def csv_to_json(file_path):
 
         for row in reader:
             csv_rows.extend([{title[i]: row[title[i]]
-                            for i in range(len(title))}])
+                              for i in range(len(title))}])
 
+    if csv_rows == None or csv_rows == []:
+        raise ValueError('Failed to convert CSV file to JSON. Exiting script.')
     return csv_rows
 
 
-if __name__ == '__main__':
-
-    csv_file_path = os.getcwd() + '/../test_data/sites_with_clients.csv'
-
-    # Convert CSV to valid JSON
-    data = csv_to_json(csv_file_path)
-    if data == None or data == []:
-        raise ValueError('Failed to convert CSV file to JSON. Exiting script.')
-
-    # Create each site from the CSV file
+def add_geocoding_to_json(data):
     for d in data:
         # Variables
         site_id = None
@@ -43,9 +36,21 @@ if __name__ == '__main__':
         d['gps'] = gps
         d['country_code'] = country_code
         d['time_zone'] = time_zone
+    return data
+
+
+if __name__ == '__main__':
+
+    csv_file_path = os.getcwd() + '/../data_src/sites_with_clients.csv'
+
+    # Convert CSV to valid JSON
+    json_data_without_geocoding = convert_csv_to_json(csv_file_path)
+
+    json_data_with_geocoding = add_geocoding_to_json(
+        json_data_without_geocoding)
 
     juniper_script(
         mist_api_token=os.environ['MIST_API_TOKEN'],
         org_id=os.environ['ORG_ID'],
-        data=data
+        data=json_data_with_geocoding
     )
