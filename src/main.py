@@ -41,7 +41,7 @@ def add_geocoding_to_json(data):
 
 if __name__ == '__main__':
 
-    csv_file_path = os.getcwd() + '/../test_data/sites_with_clients.csv'
+    csv_file_path = os.getcwd() + '/../data_src/sites_with_clients.csv'
 
     # Convert CSV to valid JSON
     json_data_without_geocoding = convert_csv_to_json(csv_file_path)
