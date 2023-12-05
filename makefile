@@ -9,7 +9,7 @@ build: ## Build the docker container
 .PHONO: create-dir
 make create-dir: ## Creates a directory for end user to put CSV file into
 	mkdir data_src;
-	echo "Please put csv file into data_src then run 'make-prod'";
+	echo "Please put csv file into data_src then run 'make run-prod'";
 
 .PHONY: run-prod
 run-prod: ## Run the python script only mounting the host for csv-file. Format: MIST_API_TOKEN=foo ORG_ID=bar make run-prod
