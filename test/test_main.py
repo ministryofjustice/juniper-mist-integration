@@ -31,7 +31,7 @@ class TestCsvToJson(unittest.TestCase):
         self.csv_writer.writerows(self.csv_data)
         self.csv_file.close()
 
-    def test_given_csv_file_when_csv_valid_then_convert_to_json(self):
+    def test_convert_csv_to_json_valid_csv(self):
         expected_json = self.csv_data
         actual_json = convert_csv_to_json(self.csv_file.name)
         self.assertEqual(actual_json, expected_json)
