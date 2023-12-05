@@ -12,14 +12,14 @@ make create-dir: ## Creates a directory for end user to put CSV file into
 	echo "Please put csv file into data_src then run 'make-prod'";
 
 .PHONY: run-prod
-run-prod: ## Run the python script only mounting the host for csv-file.
+run-prod: ## Run the python script only mounting the host for csv-file. Format: MIST_API_TOKEN=foo ORG_ID=bar make run-prod
 	docker run -v $(shell pwd)/data_src:/data_src \
 				-e MIST_API_TOKEN=$$MIST_API_TOKEN \
 				-e ORG_ID=$$ORG_ID \
 				juniper-mist
 
 .PHONY: run-dev
-run-dev: ## Run the python script while mounting the host. This enables using the latest local src code without needing to wait for a container build.
+run-dev: ## Run the python script while mounting the host. This enables using the latest local src code without needing to wait for a container build. Format: MIST_API_TOKEN=foo ORG_ID=bar make run-dev
 	docker run -v $(shell pwd)/src:/app/src \
 				-v $(shell pwd)/data_src:/data_src \
 				-e MIST_API_TOKEN=$$MIST_API_TOKEN \

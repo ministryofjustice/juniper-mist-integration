@@ -13,7 +13,7 @@ This repo has been developed by the DevOps Lan&Wi-Fi to automate site creation o
 
 ### Setup
 
-- Run `make build-dev`
+- Run `make build`
 - Integrate built docker container with IDE. [here](https://www.jetbrains.com/help/idea/configuring-remote-python-sdks.html#2546d02c) is the example for intelliJ
 - mark src directory & test directory within the IDE. [here](https://www.jetbrains.com/help/idea/content-roots.html)
 
