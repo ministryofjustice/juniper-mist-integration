@@ -35,6 +35,9 @@ current_version: ## Get current version eg v3.4.1
 
 .PHONY: preview_version
 preview_version: ## increment version eg v3.4.1 > v3.5.0. Use SEMVAR=[ patch | minor | major ]
+ifeq ($(filter $(SEMVAR), patch minor major),)
+	$(error invalid `SEMVAR` value)
+endif
 	@echo "CURRENT_VERSION := $(CURRENT_VERSION)"
 	@echo "$(SEMVAR) := $(NEXT_VERSION)"
 
@@ -44,6 +47,9 @@ preview_name: ## view container name
 
 .PHONY: tag
 tag: ## Tag branch in git repo with next version number. Use SEMVAR=[ patch | minor | major ]
+ifeq ($(filter $(SEMVAR), patch minor major),)
+	$(error invalid `SEMVAR` value)
+endif
 	@echo "tagging with $(NEXT_VERSION)"
 	@git tag -a "$(NEXT_VERSION)" -m "Bump from $(CURRENT_VERSION) to $(NEXT_VERSION)"
 	@git push origin main --follow-tags
