@@ -10,5 +10,5 @@ env/
 terraform.tfstate
 
 data_src/**.csv
-./idea/*
+.idea
 **/__pycache__/
