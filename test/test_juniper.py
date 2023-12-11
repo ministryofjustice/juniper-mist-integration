@@ -6,9 +6,10 @@ import os
 
 class TestJuniperScript(unittest.TestCase):
 
+    @patch('src.juniper.requests.Session.get', return_value=MagicMock(status_code=200))
     @patch('src.juniper.Admin.post')
     @patch('src.juniper.Admin.put')
-    def test_juniper_script(self, mock_put, mock_post):
+    def test_juniper_script(self, mock_put, mock_post, mock_successful_login):
         # Mock Mist API responses
         mock_post.return_value = {'id': '123', 'name': 'TestSite'}
         mock_put.return_value = {'status': 'success'}
@@ -84,7 +85,6 @@ class TestJuniperScript(unittest.TestCase):
     @patch('src.juniper.requests.Session.post', return_value=MagicMock(status_code=400))
     def test_given_valid_username_and_password_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self, mock_post, mock_input):
         with self.assertRaises(ValueError) as context:
-            # Ensure the code under test (Admin initialization) is inside the 'with' block
             admin = Admin(username='test@example.com', password='password')
 
         # Check the expected part of the exception message
@@ -100,8 +100,31 @@ class TestJuniperScript(unittest.TestCase):
         # Ensure the post method is called twice
         self.assertEqual(mock_post.call_count, 2)
 
+
+
+    @patch('src.juniper.requests.Session')
+    def test_given_valid_api_token_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self, mock_session):
+        mock_get = mock_session.return_value.get
+        mock_get.return_value = MagicMock(status_code=400)
+
+        with self.assertRaises(ValueError) as context:
+            admin = Admin(token='test_token')
+
+        # Check the expected part of the exception message
+        expected_error_message = "Login was not successful via token:"
+        self.assertTrue(expected_error_message in str(context.exception))
+
+        # Ensure the get method is called with the correct parameters
+        expected_url = 'https://api.eu.mist.com/api/v1/self/apitokens'
+        mock_get.assert_called_with(expected_url,
+                                    headers={'Content-Type': 'application/json', 'Authorization': 'Token test_token'}
+                                    )
+
+        self.assertEqual(mock_get.call_count, 1)
+
+    @patch('src.juniper.requests.Session.get', return_value=MagicMock(status_code=200))
     @patch('src.juniper.requests.Session.post')
-    def test_post(self, mock_post):
+    def test_post(self, mock_post, mock_successful_login):
         # Set up the mock to return a response with a valid JSON payload
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -119,8 +142,9 @@ class TestJuniperScript(unittest.TestCase):
         expected_result = {'key': 'value'}
         self.assertEqual(result, expected_result)
 
+    @patch('src.juniper.requests.Session.get', return_value=MagicMock(status_code=200))
     @patch('src.juniper.requests.Session.put')
-    def test_put(self, mock_put):
+    def test_put(self, mock_put, mock_successful_login):
         # Set up the mock to return a response with a valid JSON payload
         mock_response = MagicMock()
         mock_response.status_code = 200

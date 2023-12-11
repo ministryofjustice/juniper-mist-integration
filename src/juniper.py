@@ -6,8 +6,7 @@ import json
 class Admin:
 
     def login_via_username_and_password(self, username, password):
-        base_url = 'https://api.eu.mist.com/api/v1'
-        login_url = base_url + "/login"
+        login_url = self.base_url + "/login"
         login_payload = {'email': username, 'password': password}
         self.session.post(login_url, data=login_payload)
         mfa_headers = {
@@ -26,10 +25,19 @@ class Admin:
 
     def login_via_token(self, token):
         self.headers['Authorization'] = 'Token ' + token
+        request_url = self.base_url + "/self/apitokens"
+        responce = self.session.get(request_url, headers=self.headers)
+        if responce.status_code == 200:
+            print("Login successful")
+        else:
+            raise ValueError("Login was not successful via token: {response}".format(response=responce))
+
+
 
     def __init__(self, token=None, username=None, password=None):
         self.session = requests.Session()
         self.headers = {'Content-Type': 'application/json'}
+        self.base_url = 'https://api.eu.mist.com/api/v1'
 
         if token:
             self.login_via_token(token)
