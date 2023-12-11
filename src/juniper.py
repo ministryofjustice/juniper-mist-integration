@@ -19,6 +19,10 @@ class Admin:
             "https://api.eu.mist.com/api/v1/login/two_factor",
             data={"two_factor": mfa_code}
         )
+        if login_response.status_code == 200:
+            print("Login successful")
+        else:
+            raise ValueError("Login was not successful: {response}".format(response=login_response))
 
     def login_via_token(self, token):
         self.headers['Authorization'] = 'Token ' + token

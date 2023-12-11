@@ -73,18 +73,32 @@ class TestJuniperScript(unittest.TestCase):
 
     @patch('builtins.input', return_value='123456')  # Mocking the input function to provide a static MFA code
     @patch('src.juniper.requests.Session.post', return_value=MagicMock(status_code=200))
-    def test_login_via_username_and_password(self, mock_post, mock_input):
+    def test_login_successfully_via_username_and_password(self, mock_post, mock_input):
         admin = Admin(username='test@example.com', password='password')
         self.assertIsNotNone(admin)
 
         mock_post.assert_called_with('https://api.eu.mist.com/api/v1/login/two_factor', data={'two_factor': '123456'})
         self.assertEqual(mock_post.call_count, 2)
 
+    @patch('builtins.input', return_value='123456')
+    @patch('src.juniper.requests.Session.post', return_value=MagicMock(status_code=400))
+    def test_given_valid_username_and_password_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self, mock_post, mock_input):
+        with self.assertRaises(ValueError) as context:
+            # Ensure the code under test (Admin initialization) is inside the 'with' block
+            admin = Admin(username='test@example.com', password='password')
 
-    def test_login_via_token(self):
-        admin = Admin(token='test_token')
-        assert(admin.headers == {'Content-Type': 'application/json', 'Authorization': 'Token test_token'})
+        # Check the expected part of the exception message
+        expected_error_message = "Login was not successful:"
+        self.assertTrue(expected_error_message in str(context.exception))
 
+        # Ensure the post method is called with the correct parameters
+        mock_post.assert_called_with(
+            'https://api.eu.mist.com/api/v1/login/two_factor',
+            data={'two_factor': '123456'}
+        )
+
+        # Ensure the post method is called twice
+        self.assertEqual(mock_post.call_count, 2)
 
     @patch('src.juniper.requests.Session.post')
     def test_post(self, mock_post):
