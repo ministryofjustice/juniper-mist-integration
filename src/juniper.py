@@ -1,17 +1,38 @@
-import sys
 import requests
 import json
 
 # Mist CRUD operations
 
+class Admin:
 
-class Admin(object):
-    def __init__(self, token=''):
-        self.session = requests.Session()
-        self.headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Token ' + token
+    def login_via_username_and_password(self, username, password):
+        base_url = 'https://api.eu.mist.com/api/v1'
+        login_url = base_url + "/login"
+        login_payload = {'email': username, 'password': password}
+        self.session.post(login_url, data=login_payload)
+        mfa_headers = {
+            'X-CSRFToken': self.session.cookies.get('csrftoken.eu'),  # Include CSRF token in headers
         }
+        self.session.headers.update(mfa_headers)
+        mfa_code = input("Enter MFA:")
+        login_response = self.session.post(
+            "https://api.eu.mist.com/api/v1/login/two_factor",
+            data={"two_factor": mfa_code}
+        )
+
+    def login_via_token(self, token):
+        self.headers['Authorization'] = 'Token ' + token
+
+    def __init__(self, token=None, username=None, password=None):
+        self.session = requests.Session()
+        self.headers = {'Content-Type': 'application/json'}
+
+        if token:
+            self.login_via_token(token)
+        elif username and password:
+            self.login_via_username_and_password(username, password)
+        else:
+            raise ValueError("Invalid parameters provided for authentication.")
 
     def post(self, url, payload, timeout=60):
         url = 'https://api.eu.mist.com{}'.format(url)
@@ -25,9 +46,7 @@ class Admin(object):
             print('Failed to POST')
             print('\tURL: {}'.format(url))
             print('\tPayload: {}'.format(payload))
-            print('\tResponse: {} ({})'.format(
-                response.text, response.status_code))
-
+            print('\tResponse: {} ({})'.format(response.text, response.status_code))
             return False
 
         return json.loads(response.text)
@@ -44,9 +63,7 @@ class Admin(object):
             print('Failed to PUT')
             print('\tURL: {}'.format(url))
             print('\tPayload: {}'.format(payload))
-            print('\tResponse: {} ({})'.format(
-                response.text, response.status_code))
-
+            print('\tResponse: {} ({})'.format(response.text, response.status_code))
             return False
 
         return json.loads(response.text)
@@ -55,22 +72,22 @@ class Admin(object):
 # Main function
 def juniper_script(
         data,
-        mist_api_token='',
-        org_id=''):
+        mist_api_token=None,
+        org_id=None,
+        mist_username=None,
+        mist_password=None
+):
 
     # Configure True/False to enable/disable additional logging of the API response objects
     show_more_details = True
-
     # Check for required variables
-    if mist_api_token == '':
-        print('Please provide your Mist API token as mist_api_token')
-        sys.exit(1)
-    elif org_id == '':
-        print('Please provide your Mist Organization UUID as org_id')
-        sys.exit(1)
+    if org_id is None or org_id == '':
+        raise ValueError('Please provide Mist org_id')
+    if (mist_api_token is None ) and (mist_username is None or mist_password is None):
+        raise ValueError('No authentication provided, provide mist username and password or API key')
 
     # Establish Mist session
-    admin = Admin(mist_api_token)
+    admin = Admin(mist_api_token, mist_username, mist_password)
 
     # Create each site from the CSV file
     for d in data:
