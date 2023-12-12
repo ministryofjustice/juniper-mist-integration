@@ -96,7 +96,8 @@ def juniper_script(
         org_id=None,
         mist_username=None,
         mist_password=None,
-        site_group_ids=None
+        site_group_ids=None,
+        rf_template_id=None
 ):
 
     # Configure True/False to enable/disable additional logging of the API response objects
@@ -108,6 +109,8 @@ def juniper_script(
         raise ValueError('No authentication provided, provide mist username and password or API key')
     if site_group_ids is None:
         raise ValueError('Must provide site_group_ids for GovWifi & MoJWifi')
+    if rf_template_id is None:
+        raise ValueError('Must rf_template_id')
 
     # Establish Mist session
     admin = Admin(mist_api_token, mist_username, mist_password)
@@ -120,7 +123,7 @@ def juniper_script(
                 'address': d.get('Site Address', ''),
                 "latlng": {"lat": d.get('gps', '')[0], "lng": d.get('gps', '')[1]},
                 "country_code": d.get('country_code', ''),
-                "rftemplate_id": "8542a5fa-51e4-41be-83b9-acb416362cc0",
+                "rftemplate_id": rf_template_id,
                 "timezone": d.get('time_zone', ''),
                 "sitegroup_ids": check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
                     gov_wifi=d.get('Enable GovWifi', ''),

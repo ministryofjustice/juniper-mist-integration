@@ -26,7 +26,8 @@ class TestJuniperScript(unittest.TestCase):
             data,
             mist_api_token='your_token',
             org_id='your_org_id',
-            site_group_ids='{"moj_wifi": "foo","gov_wifi": "bar"}'
+            site_group_ids='{"moj_wifi": "foo","gov_wifi": "bar"}',
+            rf_template_id='8542a5fa-51e4-41be-83b9-acb416362cc0'
         )
 
         # Assertions
@@ -50,11 +51,23 @@ class TestJuniperScript(unittest.TestCase):
         })
 
     def test_juniper_script_missing_site_group_ids(self):
-        # Test when mist_api_token is missing
         with self.assertRaises(ValueError) as cm:
             juniper_script([], org_id='your_org_id', mist_api_token='token')
 
         self.assertEqual(str(cm.exception), 'Must provide site_group_ids for GovWifi & MoJWifi')
+
+    def test_juniper_script_missing_rf_template_id(self):
+        # Test when rf_template_id is missing
+        with self.assertRaises(ValueError) as cm:
+            juniper_script([],
+                           org_id='your_org_id',
+                           mist_api_token='token',
+                           site_group_ids = {
+                            'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+                            'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'
+                           })
+
+        self.assertEqual(str(cm.exception), 'Must rf_template_id')
 
     def test_juniper_script_missing_api_token(self):
             # Test when mist_api_token is missing
