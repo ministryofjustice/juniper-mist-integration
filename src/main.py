@@ -53,6 +53,7 @@ if __name__ == '__main__':
         mist_api_token=os.environ.get('MIST_API_TOKEN'),
         mist_username=os.environ.get('MIST_USERNAME'),
         mist_password=os.environ.get('MIST_PASSWORD'),
+        site_group_ids=os.environ.get('SITE_GROUP_IDS'),
         org_id=os.environ.get('ORG_ID'),
         data=json_data_with_geocoding
     )

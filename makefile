@@ -60,10 +60,9 @@ build: ## Build the docker container
 	docker tag ${IMG} ${LATEST}
 
 .PHONO: create-dir
-make setup-working-directory: ## Setups CSV directory and .env file
+make setup-working-directory: ## Setups CSV directory
 	mkdir data_src;
 	echo "Please put csv file into data_src then run 'make run-prod'";
-	printf '%s\n' ';MIST_USERNAME=' ';MIST_PASSWORD=' ';ORG_ID=' ';MIST_API_TOKEN=' >.env;
 
 .PHONY: run-prod
 run-prod: ## Run the python script only mounting the host for csv-file. Format: MIST_API_TOKEN=foo ORG_ID=bar make run-prod

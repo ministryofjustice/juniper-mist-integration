@@ -80,6 +80,14 @@ class Admin:
 
         return json.loads(response.text)
 
+def check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wifi, site_group_ids: dict):
+    result = []
+    if moj_wifi == 'TRUE':
+        result.append(site_group_ids['moj_wifi'])
+    if gov_wifi == 'TRUE':
+        result.append(site_group_ids['gov_wifi'])
+    return result
+
 
 # Main function
 def juniper_script(
@@ -87,7 +95,8 @@ def juniper_script(
         mist_api_token=None,
         org_id=None,
         mist_username=None,
-        mist_password=None
+        mist_password=None,
+        site_group_ids=None
 ):
 
     # Configure True/False to enable/disable additional logging of the API response objects
@@ -97,6 +106,8 @@ def juniper_script(
         raise ValueError('Please provide Mist org_id')
     if (mist_api_token is None ) and (mist_username is None or mist_password is None):
         raise ValueError('No authentication provided, provide mist username and password or API key')
+    if site_group_ids is None:
+        raise ValueError('Must provide site_group_ids for GovWifi & MoJWifi')
 
     # Establish Mist session
     admin = Admin(mist_api_token, mist_username, mist_password)
@@ -109,19 +120,25 @@ def juniper_script(
                 'address': d.get('Site Address', ''),
                 "latlng": {"lat": d.get('gps', '')[0], "lng": d.get('gps', '')[1]},
                 "country_code": d.get('country_code', ''),
+                "rftemplate_id": "8542a5fa-51e4-41be-83b9-acb416362cc0",
                 "timezone": d.get('time_zone', ''),
+                "sitegroup_ids": check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
+                    gov_wifi=d.get('Enable GovWifi', ''),
+                    moj_wifi=d.get('Enable MoJWifi', '' ),
+                    site_group_ids=json.loads(site_group_ids)
+                ),
                 }
 
         # MOJ specific attributes
         site_setting = {
 
             "vars": {
-                "Enable GovWifi": d.get('Enable GovWifi', ''),
-                "Enable MoJWifi": d.get('Enable MoJWifi', ''),
-                "Wired NACS Radius Key": d.get('Wired NACS Radius Key', ''),
-                "GovWifi Radius Key": d.get('GovWifi Radius Key', '')
+                "site_specific_radius_wired_nacs_secret": d.get('Wired NACS Radius Key', ''),
+                "site_specific_radius_govwifi_secret": d.get('GovWifi Radius Key', ''),
+                "address": d.get('Site Address', ''),
+                "site_name": d.get('Site Name', '')
+            },
 
-            }
 
         }
 

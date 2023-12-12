@@ -1,7 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.juniper import juniper_script, Admin
-import os
+from src.juniper import juniper_script, Admin, check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups
 
 
 class TestJuniperScript(unittest.TestCase):
@@ -23,7 +22,12 @@ class TestJuniperScript(unittest.TestCase):
         ]
 
         # Call the function
-        juniper_script(data, mist_api_token='your_token', org_id='your_org_id')
+        juniper_script(
+            data,
+            mist_api_token='your_token',
+            org_id='your_org_id',
+            site_group_ids='{"moj_wifi": "foo","gov_wifi": "bar"}'
+        )
 
         # Assertions
         mock_post.assert_called_once_with('/api/v1/orgs/your_org_id/sites', {
@@ -31,18 +35,26 @@ class TestJuniperScript(unittest.TestCase):
             'address': '123 Main St',
             'latlng': {'lat': 1.23, 'lng': 4.56},
             'country_code': 'US',
-            'timezone': 'UTC'
+            'rftemplate_id': '8542a5fa-51e4-41be-83b9-acb416362cc0',
+            'timezone': 'UTC',
+            'sitegroup_ids': []
         })
 
         mock_put.assert_called_once_with('/api/v1/sites/123/setting', {
             'vars': {
-                'Enable GovWifi': 'true',
-                'Enable MoJWifi': 'false',
-                'Wired NACS Radius Key': 'key1',
-                'GovWifi Radius Key': 'key2'
+                'site_specific_radius_wired_nacs_secret': 'key1',
+                'site_specific_radius_govwifi_secret': 'key2',
+                'address' : '123 Main St',
+                'site_name': 'TestSite'
             }
         })
 
+    def test_juniper_script_missing_site_group_ids(self):
+        # Test when mist_api_token is missing
+        with self.assertRaises(ValueError) as cm:
+            juniper_script([], org_id='your_org_id', mist_api_token='token')
+
+        self.assertEqual(str(cm.exception), 'Must provide site_group_ids for GovWifi & MoJWifi')
 
     def test_juniper_script_missing_api_token(self):
             # Test when mist_api_token is missing
@@ -162,3 +174,37 @@ class TestJuniperScript(unittest.TestCase):
 
         # Assert that the method returns the expected result
         self.assertIsNotNone(result)
+
+class TestCheckIfNeedToAppend(unittest.TestCase):
+
+    def setUp(self):
+        # Define sample site group IDs for testing
+        self.site_group_ids = {
+            'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+            'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'
+        }
+
+    def test_append_gov_wifi(self):
+        gov_wifi = 'TRUE'
+        moj_wifi = 'FALSE'
+        result = check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wifi, self.site_group_ids)
+        self.assertEqual(result, [self.site_group_ids['gov_wifi']])
+
+    def test_append_moj_wifi(self):
+        gov_wifi = 'FALSE'
+        moj_wifi = 'TRUE'
+        result = check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wifi, self.site_group_ids)
+        self.assertEqual(result, [self.site_group_ids['moj_wifi']])
+
+    def test_append_both_wifi(self):
+        gov_wifi = 'TRUE'
+        moj_wifi = 'TRUE'
+        result = check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wifi, self.site_group_ids)
+        expected_result = [self.site_group_ids['moj_wifi'], self.site_group_ids['gov_wifi']]
+        self.assertEqual(result, expected_result)
+
+    def test_append_neither_wifi(self):
+        gov_wifi = 'FALSE'
+        moj_wifi = 'FALSE'
+        result = check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wifi, self.site_group_ids)
+        self.assertEqual(result, [])
