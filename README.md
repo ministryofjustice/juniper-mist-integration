@@ -7,11 +7,10 @@ This repo has been developed by the DevOps Lan&Wi-Fi to automate site creation o
 Run the following:
 
 1. Copy this in your terminal and paste to create the working directory.
- 
+
 ```
 mkdir -p ~/mist_working_directory/data_src && cd ~/mist_working_directory
 ```
-
 
 2. Copy this in your terminal and paste
 
