@@ -13,7 +13,7 @@ Run the following:
    and password MFA will be requested during runtime. All other inputs are mandatory: ORG_ID, SITE_GROUP_IDS
    , RF_TEMPLATE_ID
 4. Create a csv file named: `sites_with_clients.csv` within '~/mist_working_directory/data_src'
-   Below is an example of how the CSV should be formatted.
+   Below is an [example](./example.sites_with_clients.csv) of how the CSV should be formatted.
 
 ```
 Site Name,Site Address,Enable GovWifi,Enable MoJWifi, GovWifi Radius Key, Wired NACS Radius Key
