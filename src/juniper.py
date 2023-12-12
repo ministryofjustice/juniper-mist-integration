@@ -1,17 +1,52 @@
-import sys
 import requests
 import json
 
 # Mist CRUD operations
 
 
-class Admin(object):
-    def __init__(self, token=''):
-        self.session = requests.Session()
-        self.headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Token ' + token
+class Admin:
+
+    def login_via_username_and_password(self, username, password):
+        login_url = self.base_url + "/login"
+        login_payload = {'email': username, 'password': password}
+        self.session.post(login_url, data=login_payload)
+        mfa_headers = {
+            # Include CSRF token in headers
+            'X-CSRFToken': self.session.cookies.get('csrftoken.eu'),
         }
+        self.session.headers.update(mfa_headers)
+        mfa_code = input("Enter MFA:")
+        login_response = self.session.post(
+            "https://api.eu.mist.com/api/v1/login/two_factor",
+            data={"two_factor": mfa_code}
+        )
+        if login_response.status_code == 200:
+            print("Login successful")
+        else:
+            raise ValueError("Login was not successful: {response}".format(
+                response=login_response))
+
+    def login_via_token(self, token):
+        self.headers['Authorization'] = 'Token ' + token
+        request_url = self.base_url + "/self/apitokens"
+        responce = self.session.get(request_url, headers=self.headers)
+        if responce.status_code == 200:
+            print("Login successful")
+        else:
+            raise ValueError(
+                "Login was not successful via token: {response}".format(response=responce))
+
+    def __init__(self, token=None, username=None, password=None):
+        self.session = requests.Session()
+        self.headers = {'Content-Type': 'application/json'}
+        self.base_url = 'https://api.eu.mist.com/api/v1'
+
+        if token:
+            self.login_via_token(token)
+        elif username and password:
+            self.login_via_username_and_password(username, password)
+        else:
+            raise ValueError("Invalid parameters provided for authentication.")
 
     def post(self, url, payload, timeout=60):
         url = 'https://api.eu.mist.com{}'.format(url)
@@ -27,7 +62,6 @@ class Admin(object):
             print('\tPayload: {}'.format(payload))
             print('\tResponse: {} ({})'.format(
                 response.text, response.status_code))
-
             return False
 
         return json.loads(response.text)
@@ -46,31 +80,46 @@ class Admin(object):
             print('\tPayload: {}'.format(payload))
             print('\tResponse: {} ({})'.format(
                 response.text, response.status_code))
-
             return False
 
         return json.loads(response.text)
 
 
+def check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wifi, site_group_ids: dict):
+    result = []
+    if moj_wifi == 'TRUE':
+        result.append(site_group_ids['moj_wifi'])
+    if gov_wifi == 'TRUE':
+        result.append(site_group_ids['gov_wifi'])
+    return result
+
+
 # Main function
 def juniper_script(
         data,
-        mist_api_token='',
-        org_id=''):
+        mist_api_token=None,
+        org_id=None,
+        mist_username=None,
+        mist_password=None,
+        site_group_ids=None,
+        rf_template_id=None
+):
 
     # Configure True/False to enable/disable additional logging of the API response objects
     show_more_details = True
-
     # Check for required variables
-    if mist_api_token == '':
-        print('Please provide your Mist API token as mist_api_token')
-        sys.exit(1)
-    elif org_id == '':
-        print('Please provide your Mist Organization UUID as org_id')
-        sys.exit(1)
+    if org_id is None or org_id == '':
+        raise ValueError('Please provide Mist org_id')
+    if (mist_api_token is None) and (mist_username is None or mist_password is None):
+        raise ValueError(
+            'No authentication provided, provide mist username and password or API key')
+    if site_group_ids is None:
+        raise ValueError('Must provide site_group_ids for GovWifi & MoJWifi')
+    if rf_template_id is None:
+        raise ValueError('Must rf_template_id')
 
     # Establish Mist session
-    admin = Admin(mist_api_token)
+    admin = Admin(mist_api_token, mist_username, mist_password)
 
     # Create each site from the CSV file
     for d in data:
@@ -80,19 +129,25 @@ def juniper_script(
                 'address': d.get('Site Address', ''),
                 "latlng": {"lat": d.get('gps', '')[0], "lng": d.get('gps', '')[1]},
                 "country_code": d.get('country_code', ''),
+                "rftemplate_id": rf_template_id,
                 "timezone": d.get('time_zone', ''),
-                }
+                "sitegroup_ids": check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
+                    gov_wifi=d.get('Enable GovWifi', ''),
+                    moj_wifi=d.get('Enable MoJWifi', ''),
+                    site_group_ids=json.loads(site_group_ids)
+        ),
+        }
 
         # MOJ specific attributes
         site_setting = {
 
             "vars": {
-                "Enable GovWifi": d.get('Enable GovWifi', ''),
-                "Enable MoJWifi": d.get('Enable MoJWifi', ''),
-                "Wired NACS Radius Key": d.get('Wired NACS Radius Key', ''),
-                "GovWifi Radius Key": d.get('GovWifi Radius Key', '')
+                "site_specific_radius_wired_nacs_secret": d.get('Wired NACS Radius Key', ''),
+                "site_specific_radius_govwifi_secret": d.get('GovWifi Radius Key', ''),
+                "address": d.get('Site Address', ''),
+                "site_name": d.get('Site Name', '')
+            },
 
-            }
 
         }
 
