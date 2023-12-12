@@ -6,8 +6,11 @@ This repo has been developed by the DevOps Lan&Wi-Fi to automate site creation o
 
 Run the following:
 
-1. `mkdir ~/mist_working_directory && ~/mist_working_directory/data_src && cd ~/mist_working_directory`
-2. `wget -O .env https://github.com/ministryofjustice/juniper-mist-integration/blob/main/example.env`
+1. ```mkdir ~/mist_working_directory && ~/mist_working_directory/data_src && cd ~/mist_working_directory```
+
+
+2. ```wget -O .env https://github.com/ministryofjustice/juniper-mist-integration/blob/main/example.env```
+
 3. Configure .env file:
    You must either provide MIST_USERNAME and MIST_PASSWORD or MIST_API_TOKEN. If you opt for username
    and password MFA will be requested during runtime. All other inputs are mandatory: ORG_ID, SITE_GROUP_IDS
