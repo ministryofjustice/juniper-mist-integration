@@ -13,13 +13,15 @@ Run the following:
    and password MFA will be requested during runtime. All other inputs are mandatory: ORG_ID, SITE_GROUP_IDS
    , RF_TEMPLATE_ID
 4. Create a csv file named: `sites_with_clients.csv` within '~/mist_working_directory/data_src'
-Below is an example of how the CSV should be formatted.
+   Below is an example of how the CSV should be formatted.
+
 ```
 Site Name,Site Address,Enable GovWifi,Enable MoJWifi, GovWifi Radius Key, Wired NACS Radius Key
 Test location 1,"40 Mayflower Dr, Plymouth PL2 3DG", TRUE, FALSE, 00000DD0000BC0EEE000, 00000DD0000BC0EEE000
 Test location 2,"102 Petty France, London SW1H 9AJ", FALSE, TRUE, 00000DD0000BC0EEE000, 00000DD0000BC0EEE000
 Test location 3,"Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB", FALSE, FALSE, 00000DD0000BC0EEE000, 00000DD0000BC0EEE000
 ```
+
 5. `docker run -it -v $(pwd)/data_src:/data_src --env-file .env docker pull ghcr.io/ministryofjustice/nvvs/juniper-mist-integration/app:latest`
 
 ## Development setup
