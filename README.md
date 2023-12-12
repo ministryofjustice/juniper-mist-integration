@@ -19,13 +19,12 @@ wget -O .env https://raw.githubusercontent.com/ministryofjustice/juniper-mist-in
 ```
 
 3. Configure .env file:
-      You must either provide MIST_USERNAME and MIST_PASSWORD or MIST_API_TOKEN.
-      If you opt for username and password MFA will be requested during runtime.
-      All other inputs are mandatory:
-         ORG_ID,
-         SITE_GROUP_IDS,
-         RF_TEMPLATE_ID
-
+   You must either provide MIST_USERNAME and MIST_PASSWORD or MIST_API_TOKEN.
+   If you opt for username and password MFA will be requested during runtime.
+   All other inputs are mandatory:
+   ORG_ID,
+   SITE_GROUP_IDS,
+   RF_TEMPLATE_ID
 
 4. Create a csv file named: `sites_with_clients.csv` within '~/mist_working_directory/data_src'
    or copy the [example CSV](./example.sites_with_clients.csv) (which is formatted correctly) with the following command to the data directory:
