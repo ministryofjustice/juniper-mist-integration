@@ -4,7 +4,13 @@ This repo has been developed by the DevOps Lan&Wi-Fi to automate site creation o
 
 ## Run script as end user (Assuming you don't have the repo cloned)
 
-Run the following:
+### Required package prerequisites
+
+#### Docker
+
+[Docker docs mac install](https://docs.docker.com/desktop/install/mac-install/)
+
+### Run script:
 
 1. Copy this in your terminal and paste to create the working directory.
 
@@ -15,28 +21,41 @@ mkdir -p ~/mist_working_directory/data_src && cd ~/mist_working_directory
 2. Copy this in your terminal and paste
 
 ```
-wget -O .env https://raw.githubusercontent.com/ministryofjustice/juniper-mist-integration/main/example.env
+curl -o .env https://raw.githubusercontent.com/ministryofjustice/juniper-mist-integration/main/example.env
 ```
 
 3. Configure .env file:
-   You must either provide MIST_USERNAME and MIST_PASSWORD or MIST_API_TOKEN.
-   If you opt for username and password MFA will be requested during runtime.
-   All other inputs are mandatory:
-   ORG_ID,
-   SITE_GROUP_IDS,
-   RF_TEMPLATE_ID
+   Review the .env file by running:
+
+```
+nano ~/example.env
+```
+
+To fully take advantage of the .env files, you can duplicate them and have different .envs per environment.
+If you choose to do this make sure you edit the docker run command in step 6 to pass in the correctly named file.
+
+```
+.env-dev
+.env-prod
+```
 
 4. Create a csv file named: `sites_with_clients.csv` within '~/mist_working_directory/data_src'
    or copy the [example CSV](./example.sites_with_clients.csv) (which is formatted correctly) with the following command to the data directory:
 
 ```
-wget -O data_src/sites_with_clients.csv https://raw.githubusercontent.com/ministryofjustice/juniper-mist-integration/main/example.sites_with_clients.csv
+curl -o data_src/sites_with_clients.csv https://raw.githubusercontent.com/ministryofjustice/juniper-mist-integration/main/example.sites_with_clients.csv
 ```
 
-5. Copy this in your terminal and paste to download and run the Dockerized tooling:
+5. Make sure docker can mount the `~/mist_working_directory`
+
+Within Docker Desktop Cog --> Resources --> File Sharing --> add `/Users/$YOURUSERNAME/mist_working_directory`
+
+![title](assets/docker-file-sharing.png)
+
+6. Copy this in your terminal and paste to download and run the Dockerized tooling:
 
 ```
-docker run -it -v $(pwd)/data_src:/data_src --env-file .env ghcr.io/ministryofjustice/nvvs/juniper-mist-integration/app:latest
+docker pull ghcr.io/ministryofjustice/nvvs/juniper-mist-integration/app:latest; docker run -it -v $(pwd)/data_src:/data_src --env-file .env ghcr.io/ministryofjustice/nvvs/juniper-mist-integration/app:latest
 ```
 
 ## Development setup

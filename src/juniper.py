@@ -1,12 +1,20 @@
 import requests
 import json
+import getpass
+import sys
 
 # Mist CRUD operations
 
 
 class Admin:
 
-    def login_via_username_and_password(self, username, password):
+    def login_via_username_and_password(self, username):
+        # If no username defined ask user
+        if username is None:
+            username = input("Enter Mist Username:")
+        else:
+            print('Username provided: {usr}'.format(usr=username))
+        password = getpass.getpass(prompt='Enter Mist password:')
         login_url = self.base_url + "/login"
         login_payload = {'email': username, 'password': password}
         self.session.post(login_url, data=login_payload)
@@ -26,7 +34,8 @@ class Admin:
             raise ValueError("Login was not successful: {response}".format(
                 response=login_response))
 
-    def login_via_token(self, token):
+    def login_via_token(self):
+        token = getpass.getpass(prompt='Input the MIST API TOKEN:')
         self.headers['Authorization'] = 'Token ' + token
         request_url = self.base_url + "/self/apitokens"
         responce = self.session.get(request_url, headers=self.headers)
@@ -36,17 +45,18 @@ class Admin:
             raise ValueError(
                 "Login was not successful via token: {response}".format(response=responce))
 
-    def __init__(self, token=None, username=None, password=None):
+    def __init__(self, username=None, mist_login_method=None):
         self.session = requests.Session()
         self.headers = {'Content-Type': 'application/json'}
         self.base_url = 'https://api.eu.mist.com/api/v1'
 
-        if token:
-            self.login_via_token(token)
-        elif username and password:
-            self.login_via_username_and_password(username, password)
+        if mist_login_method == 'token':
+            self.login_via_token()
+        elif mist_login_method == 'credentials':
+            self.login_via_username_and_password(username)
         else:
-            raise ValueError("Invalid parameters provided for authentication.")
+            raise ValueError('Invalid mist_login_method: {method}'.format(
+                method=mist_login_method))
 
     def post(self, url, payload, timeout=60):
         url = 'https://api.eu.mist.com{}'.format(url)
@@ -93,15 +103,28 @@ def check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wi
         result.append(site_group_ids['gov_wifi'])
     return result
 
+
+def warn_if_using_org_id_production(org_id):
+    production_org_id = '3e824dd6-6b37-4cc7-90bb-97d744e91175'
+    if org_id == production_org_id:
+        production_warning_answer = input(
+            "Warning you are using production ORG_ID, would you like to proceed? Y/N: ").upper()
+        if production_warning_answer == "Y":
+            print("Continuing with run")
+            return 'Continuing_with_run'
+        elif production_warning_answer == "N":
+            sys.exit()
+        else:
+            raise ValueError('Invalid input')
+
 # Main function
 
 
 def juniper_script(
         data,
-        mist_api_token=None,
         org_id=None,
         mist_username=None,
-        mist_password=None,
+        mist_login_method=None,
         site_group_ids=None,
         rf_template_id=None,
         network_template_id=None
@@ -109,21 +132,25 @@ def juniper_script(
 
     # Configure True/False to enable/disable additional logging of the API response objects
     show_more_details = True
+
     # Check for required variables
     if org_id is None or org_id == '':
         raise ValueError('Please provide Mist org_id')
-    if (mist_api_token is None) and (mist_username is None or mist_password is None):
-        raise ValueError(
-            'No authentication provided, provide mist username and password or API key')
     if site_group_ids is None:
         raise ValueError('Must provide site_group_ids for GovWifi & MoJWifi')
     if rf_template_id is None:
         raise ValueError('Must define rf_template_id')
     if network_template_id is None:
         raise ValueError('Must define network_template_id')
+    if mist_login_method is None:
+        print("mist_login_method not defined. Defaulting to credentials")
+        mist_login_method = 'credentials'
+
+    # Prompt user if we are using production org_id
+    warn_if_using_org_id_production(org_id)
 
     # Establish Mist session
-    admin = Admin(mist_api_token, mist_username, mist_password)
+    admin = Admin(mist_username, mist_login_method)
 
     # Create each site from the CSV file
     for d in data:
