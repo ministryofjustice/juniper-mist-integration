@@ -93,8 +93,9 @@ def check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wi
         result.append(site_group_ids['gov_wifi'])
     return result
 
-
 # Main function
+
+
 def juniper_script(
         data,
         mist_api_token=None,
@@ -102,7 +103,8 @@ def juniper_script(
         mist_username=None,
         mist_password=None,
         site_group_ids=None,
-        rf_template_id=None
+        rf_template_id=None,
+        network_template_id=None
 ):
 
     # Configure True/False to enable/disable additional logging of the API response objects
@@ -116,7 +118,9 @@ def juniper_script(
     if site_group_ids is None:
         raise ValueError('Must provide site_group_ids for GovWifi & MoJWifi')
     if rf_template_id is None:
-        raise ValueError('Must rf_template_id')
+        raise ValueError('Must define rf_template_id')
+    if network_template_id is None:
+        raise ValueError('Must define network_template_id')
 
     # Establish Mist session
     admin = Admin(mist_api_token, mist_username, mist_password)
@@ -130,6 +134,7 @@ def juniper_script(
                 "latlng": {"lat": d.get('gps', '')[0], "lng": d.get('gps', '')[1]},
                 "country_code": d.get('country_code', ''),
                 "rftemplate_id": rf_template_id,
+                "networktemplate_id": network_template_id,
                 "timezone": d.get('time_zone', ''),
                 "sitegroup_ids": check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
                     gov_wifi=d.get('Enable GovWifi', ''),
@@ -140,6 +145,50 @@ def juniper_script(
 
         # MOJ specific attributes
         site_setting = {
+
+            "auto_upgrade": {
+                "enabled": True,
+                "version": "custom",
+                "time_of_day": "02:00",
+                "custom_versions": {
+                    "AP45": "0.12.27066",
+                    "AP32": "0.12.27066"
+                },
+                "day_of_week": ""
+            },
+
+            "rogue": {
+                "min_rssi": -80,
+                "min_duration": 20,
+                "enabled": True,
+                "honeypot_enabled": True,
+                "whitelisted_bssids": [
+                    ""
+                ],
+                "whitelisted_ssids": [
+                    "GovWifi"
+                ]
+            },
+
+            "persist_config_on_device": True,
+
+            "engagement": {
+                "dwell_tags": {
+                    "passerby": "1-300",
+                    "bounce": "3600-14400",
+                    "engaged": "25200-36000",
+                    "stationed": "50400-86400"
+                },
+                "dwell_tag_names": {
+                    "passerby": "Below 5 Min (Passerby)",
+                    "bounce": "1-4 Hours",
+                    "engaged": "7-10 Hours",
+                    "stationed": "14-24 Hours"
+                }
+            },
+            "analytic": {
+                "enabled": True
+            },
 
             "vars": {
                 "site_specific_radius_wired_nacs_secret": d.get('Wired NACS Radius Key', ''),
