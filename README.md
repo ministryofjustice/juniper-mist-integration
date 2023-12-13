@@ -4,7 +4,21 @@ This repo has been developed by the DevOps Lan&Wi-Fi to automate site creation o
 
 ## Run script as end user (Assuming you don't have the repo cloned)
 
-Run the following:
+### Required package prerequisites
+#### wget:
+To install wget first install brew:
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+Now install wget:
+```
+brew install wget
+```
+
+#### Docker
+[Docker docs mac install](https://docs.docker.com/desktop/install/mac-install/)
+
+### Run script:
 
 1. Copy this in your terminal and paste to create the working directory.
 
@@ -33,10 +47,16 @@ wget -O .env https://raw.githubusercontent.com/ministryofjustice/juniper-mist-in
 wget -O data_src/sites_with_clients.csv https://raw.githubusercontent.com/ministryofjustice/juniper-mist-integration/main/example.sites_with_clients.csv
 ```
 
-5. Copy this in your terminal and paste to download and run the Dockerized tooling:
+5. Make sure docker can mount the `~/mist_working_directory`
+
+Within Docker Desktop Cog --> Resources --> File Sharing --> add `/Users/$YOURUSERNAME/mist_working_directory`
+
+![title](assets/docker-file-sharing.png)
+
+6. Copy this in your terminal and paste to download and run the Dockerized tooling:
 
 ```
-docker run -it -v $(pwd)/data_src:/data_src --env-file .env ghcr.io/ministryofjustice/nvvs/juniper-mist-integration/app:latest
+docker pull ghcr.io/ministryofjustice/nvvs/juniper-mist-integration/app:latest; docker run -it -v $(pwd)/data_src:/data_src --env-file .env ghcr.io/ministryofjustice/nvvs/juniper-mist-integration/app:latest
 ```
 
 ## Development setup
