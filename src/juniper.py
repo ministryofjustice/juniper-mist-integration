@@ -1,6 +1,7 @@
 import requests
 import json
 import getpass
+import sys
 
 # Mist CRUD operations
 
@@ -101,9 +102,19 @@ def check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wi
         result.append(site_group_ids['gov_wifi'])
     return result
 
+def warn_if_using_org_id_production(org_id):
+    production_org_id='3e824dd6-6b37-4cc7-90bb-97d744e91175'
+    if org_id == production_org_id:
+        production_warning_answer = input("Warning you are using production ORG_ID, would you like to proceed? Y/N: ").upper()
+        if production_warning_answer == "Y":
+            print("Continuing with run")
+            return 'Continuing_with_run'
+        elif production_warning_answer == "N":
+            sys.exit()
+        else:
+            raise ValueError('Invalid input')
+
 # Main function
-
-
 def juniper_script(
         data,
         org_id=None,
@@ -116,6 +127,7 @@ def juniper_script(
 
     # Configure True/False to enable/disable additional logging of the API response objects
     show_more_details = True
+
     # Check for required variables
     if org_id is None or org_id == '':
         raise ValueError('Please provide Mist org_id')
@@ -128,6 +140,9 @@ def juniper_script(
     if mist_login_method is None:
         print("mist_login_method not defined. Defaulting to credentials")
         mist_login_method='credentials'
+
+    # Prompt user if we are using production org_id
+    warn_if_using_org_id_production(org_id)
 
     # Establish Mist session
     admin = Admin(mist_username, mist_login_method)

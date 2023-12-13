@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.juniper import juniper_script, Admin, check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups
+from src.juniper import juniper_script, Admin, check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups, warn_if_using_org_id_production
 from io import StringIO
 
 class TestJuniperScript(unittest.TestCase):
@@ -118,6 +118,26 @@ class TestJuniperScript(unittest.TestCase):
                            )
 
         self.assertEqual(str(cm.exception), 'Must define rf_template_id')
+
+    @patch('builtins.input', return_value='y')
+    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_y_then_continue_to_run(self, user_input):
+        production_org_id='3e824dd6-6b37-4cc7-90bb-97d744e91175'
+        result=warn_if_using_org_id_production(production_org_id)
+        self.assertEqual(result, 'Continuing_with_run')
+
+    @patch('builtins.input', return_value='n')
+    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_n_then_sys_exit(self, user_input):
+        production_org_id='3e824dd6-6b37-4cc7-90bb-97d744e91175'
+        with self.assertRaises(SystemExit):
+            warn_if_using_org_id_production(production_org_id)
+
+    @patch('builtins.input', return_value='invalid')
+    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_invalid_then_raise_error(self, user_input):
+        production_org_id='3e824dd6-6b37-4cc7-90bb-97d744e91175'
+        with self.assertRaises(ValueError) as cm:
+            warn_if_using_org_id_production(production_org_id)
+
+        self.assertEqual(str(cm.exception), 'Invalid input')
 
     def test_juniper_script_missing_network_template_id(self):
         # Test when network_template_id is missing

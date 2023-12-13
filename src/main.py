@@ -1,3 +1,5 @@
+import sys
+
 from juniper import juniper_script
 import os
 import csv
@@ -37,7 +39,6 @@ def add_geocoding_to_json(data):
         d['country_code'] = country_code
         d['time_zone'] = time_zone
     return data
-
 
 if __name__ == '__main__':
 
