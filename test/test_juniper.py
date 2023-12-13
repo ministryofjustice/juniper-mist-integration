@@ -27,7 +27,8 @@ class TestJuniperScript(unittest.TestCase):
             mist_api_token='your_token',
             org_id='your_org_id',
             site_group_ids='{"moj_wifi": "foo","gov_wifi": "bar"}',
-            rf_template_id='8542a5fa-51e4-41be-83b9-acb416362cc0'
+            rf_template_id='8542a5fa-51e4-41be-83b9-acb416362cc0',
+            network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
         )
 
         # Assertions
@@ -37,11 +38,57 @@ class TestJuniperScript(unittest.TestCase):
             'latlng': {'lat': 1.23, 'lng': 4.56},
             'country_code': 'US',
             'rftemplate_id': '8542a5fa-51e4-41be-83b9-acb416362cc0',
+            'networktemplate_id': '46b87163-abd2-4b08-a67f-1ccecfcfd061',
             'timezone': 'UTC',
             'sitegroup_ids': []
         })
 
         mock_put.assert_called_once_with('/api/v1/sites/123/setting', {
+
+            "auto_upgrade": {
+                "enabled": True,
+                "version": "custom",
+                "time_of_day": "02:00",
+                "custom_versions": {
+                    "AP45": "0.12.27066",
+                    "AP32": "0.12.27066"
+                },
+                "day_of_week": ""
+            },
+
+            "rogue": {
+                "min_rssi": -80,
+                "min_duration": 20,
+                "enabled": True,
+                "honeypot_enabled": True,
+                "whitelisted_bssids": [
+                    ""
+                ],
+                "whitelisted_ssids": [
+                    "GovWifi"
+                ]
+            },
+
+            "persist_config_on_device": True,
+
+            "engagement": {
+                "dwell_tags": {
+                    "passerby": "1-300",
+                    "bounce": "3600-14400",
+                    "engaged": "25200-36000",
+                    "stationed": "50400-86400"
+                },
+                "dwell_tag_names": {
+                    "passerby": "Below 5 Min (Passerby)",
+                    "bounce": "1-4 Hours",
+                    "engaged": "7-10 Hours",
+                    "stationed": "14-24 Hours"
+                }
+            },
+            "analytic": {
+                "enabled": True
+            },
+
             'vars': {
                 'site_specific_radius_wired_nacs_secret': 'key1',
                 'site_specific_radius_govwifi_secret': 'key2',
@@ -64,11 +111,26 @@ class TestJuniperScript(unittest.TestCase):
                            org_id='your_org_id',
                            mist_api_token='token',
                            site_group_ids={
-                'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
-                            'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'
-            })
+                            'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+                            'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
+                            network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
+            )
 
-        self.assertEqual(str(cm.exception), 'Must rf_template_id')
+        self.assertEqual(str(cm.exception), 'Must define rf_template_id')
+
+    def test_juniper_script_missing_network_template_id(self):
+        # Test when network_template_id is missing
+        with self.assertRaises(ValueError) as cm:
+            juniper_script([],
+                           org_id='your_org_id',
+                           mist_api_token='token',
+                           site_group_ids={
+                               'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+                               'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
+                           rf_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
+                           )
+
+        self.assertEqual(str(cm.exception), 'Must define network_template_id')
 
     def test_juniper_script_missing_api_token(self):
         # Test when mist_api_token is missing

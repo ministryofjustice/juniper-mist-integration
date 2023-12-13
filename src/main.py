@@ -56,5 +56,6 @@ if __name__ == '__main__':
         site_group_ids=os.environ.get('SITE_GROUP_IDS'),
         org_id=os.environ.get('ORG_ID'),
         rf_template_id=os.environ.get('RF_TEMPLATE_ID'),
-        data=json_data_with_geocoding
+        data=json_data_with_geocoding,
+        network_template_id=os.environ.get('NETWORK_TEMPLATE_ID')
     )
