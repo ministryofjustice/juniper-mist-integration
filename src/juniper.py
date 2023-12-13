@@ -94,6 +94,8 @@ def check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wi
     return result
 
 # Main function
+
+
 def juniper_script(
         data,
         mist_api_token=None,

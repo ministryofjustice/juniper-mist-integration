@@ -111,10 +111,10 @@ class TestJuniperScript(unittest.TestCase):
                            org_id='your_org_id',
                            mist_api_token='token',
                            site_group_ids={
-                            'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+                'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
                             'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
-                            network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
-            )
+                           network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
+                           )
 
         self.assertEqual(str(cm.exception), 'Must define rf_template_id')
 
