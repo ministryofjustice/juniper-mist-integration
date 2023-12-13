@@ -40,6 +40,7 @@ def add_geocoding_to_json(data):
         d['time_zone'] = time_zone
     return data
 
+
 if __name__ == '__main__':
 
     csv_file_path = os.getcwd() + '/../data_src/sites_with_clients.csv'

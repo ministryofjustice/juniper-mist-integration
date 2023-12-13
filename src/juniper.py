@@ -11,7 +11,7 @@ class Admin:
     def login_via_username_and_password(self, username):
         # If no username defined ask user
         if username is None:
-            username= input("Enter Mist Username:")
+            username = input("Enter Mist Username:")
         else:
             print('Username provided: {usr}'.format(usr=username))
         password = getpass.getpass(prompt='Enter Mist password:')
@@ -55,7 +55,8 @@ class Admin:
         elif mist_login_method == 'credentials':
             self.login_via_username_and_password(username)
         else:
-            raise ValueError('Invalid mist_login_method: {method}'.format(method=mist_login_method))
+            raise ValueError('Invalid mist_login_method: {method}'.format(
+                method=mist_login_method))
 
     def post(self, url, payload, timeout=60):
         url = 'https://api.eu.mist.com{}'.format(url)
@@ -102,10 +103,12 @@ def check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wi
         result.append(site_group_ids['gov_wifi'])
     return result
 
+
 def warn_if_using_org_id_production(org_id):
-    production_org_id='3e824dd6-6b37-4cc7-90bb-97d744e91175'
+    production_org_id = '3e824dd6-6b37-4cc7-90bb-97d744e91175'
     if org_id == production_org_id:
-        production_warning_answer = input("Warning you are using production ORG_ID, would you like to proceed? Y/N: ").upper()
+        production_warning_answer = input(
+            "Warning you are using production ORG_ID, would you like to proceed? Y/N: ").upper()
         if production_warning_answer == "Y":
             print("Continuing with run")
             return 'Continuing_with_run'
@@ -115,6 +118,8 @@ def warn_if_using_org_id_production(org_id):
             raise ValueError('Invalid input')
 
 # Main function
+
+
 def juniper_script(
         data,
         org_id=None,
@@ -139,7 +144,7 @@ def juniper_script(
         raise ValueError('Must define network_template_id')
     if mist_login_method is None:
         print("mist_login_method not defined. Defaulting to credentials")
-        mist_login_method='credentials'
+        mist_login_method = 'credentials'
 
     # Prompt user if we are using production org_id
     warn_if_using_org_id_production(org_id)

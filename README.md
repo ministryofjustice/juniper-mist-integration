@@ -7,6 +7,7 @@ This repo has been developed by the DevOps Lan&Wi-Fi to automate site creation o
 ### Required package prerequisites
 
 #### Docker
+
 [Docker docs mac install](https://docs.docker.com/desktop/install/mac-install/)
 
 ### Run script:
@@ -24,12 +25,15 @@ curl -o .env https://raw.githubusercontent.com/ministryofjustice/juniper-mist-in
 ```
 
 3. Configure .env file:
- Review the .env file by running:
+   Review the .env file by running:
+
 ```
 nano ~/example.env
 ```
+
 To fully take advantage of the .env files, you can duplicate them and have different .envs per environment.
 If you choose to do this make sure you edit the docker run command in step 6 to pass in the correctly named file.
+
 ```
 .env-dev
 .env-prod

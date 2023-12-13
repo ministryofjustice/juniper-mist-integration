@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 from src.juniper import juniper_script, Admin, check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups, warn_if_using_org_id_production
 from io import StringIO
 
+
 class TestJuniperScript(unittest.TestCase):
 
     @patch('getpass.getpass', return_value='token')
@@ -121,19 +122,19 @@ class TestJuniperScript(unittest.TestCase):
 
     @patch('builtins.input', return_value='y')
     def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_y_then_continue_to_run(self, user_input):
-        production_org_id='3e824dd6-6b37-4cc7-90bb-97d744e91175'
-        result=warn_if_using_org_id_production(production_org_id)
+        production_org_id = '3e824dd6-6b37-4cc7-90bb-97d744e91175'
+        result = warn_if_using_org_id_production(production_org_id)
         self.assertEqual(result, 'Continuing_with_run')
 
     @patch('builtins.input', return_value='n')
     def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_n_then_sys_exit(self, user_input):
-        production_org_id='3e824dd6-6b37-4cc7-90bb-97d744e91175'
+        production_org_id = '3e824dd6-6b37-4cc7-90bb-97d744e91175'
         with self.assertRaises(SystemExit):
             warn_if_using_org_id_production(production_org_id)
 
     @patch('builtins.input', return_value='invalid')
     def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_invalid_then_raise_error(self, user_input):
-        production_org_id='3e824dd6-6b37-4cc7-90bb-97d744e91175'
+        production_org_id = '3e824dd6-6b37-4cc7-90bb-97d744e91175'
         with self.assertRaises(ValueError) as cm:
             warn_if_using_org_id_production(production_org_id)
 
@@ -153,7 +154,6 @@ class TestJuniperScript(unittest.TestCase):
 
         self.assertEqual(str(cm.exception), 'Must define network_template_id')
 
-
     @patch('src.juniper.Admin')
     def test_given_mist_login_method_not_defined_then_default_to_credentials(self, mock_admin):
         output_buffer = StringIO()
@@ -169,22 +169,23 @@ class TestJuniperScript(unittest.TestCase):
                            )
             actual_output = mock_stdout.getvalue()
         expected_message = "mist_login_method not defined. Defaulting to credentials"
-        self.assertIn(expected_message, actual_output, f"Output should contain: '{expected_message}'")
-
+        self.assertIn(expected_message, actual_output,
+                      f"Output should contain: '{expected_message}'")
 
     def test_juniper_script_missing_org_id(self):
-            # Test when org_id is missing
-            with self.assertRaises(ValueError) as cm:
-                juniper_script([], org_id=None)
+        # Test when org_id is missing
+        with self.assertRaises(ValueError) as cm:
+            juniper_script([], org_id=None)
 
-            self.assertEqual(str(cm.exception), 'Please provide Mist org_id')
+        self.assertEqual(str(cm.exception), 'Please provide Mist org_id')
 
     # Mocking the input function to provide a static MFA code
     @patch('getpass.getpass', return_value='password')
     @patch('builtins.input', return_value='123456')
     @patch('src.juniper.requests.Session.post', return_value=MagicMock(status_code=200))
     def test_login_successfully_via_username_and_password(self, mock_post, input_mfa, input_password):
-        admin = Admin(username='test@example.com', mist_login_method='credentials')
+        admin = Admin(username='test@example.com',
+                      mist_login_method='credentials')
         self.assertIsNotNone(admin)
 
         mock_post.assert_called_with(
@@ -196,7 +197,8 @@ class TestJuniperScript(unittest.TestCase):
     @patch('src.juniper.requests.Session.post', return_value=MagicMock(status_code=400))
     def test_given_valid_username_and_password_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self, mock_post, mfa_input, password_input):
         with self.assertRaises(ValueError) as context:
-            admin = Admin(username='test@example.com', mist_login_method='credentials')
+            admin = Admin(username='test@example.com',
+                          mist_login_method='credentials')
 
         # Check the expected part of the exception message
         expected_error_message = "Login was not successful:"
