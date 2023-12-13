@@ -50,9 +50,8 @@ if __name__ == '__main__':
         json_data_without_geocoding)
 
     juniper_script(
-        mist_api_token=os.environ.get('MIST_API_TOKEN'),
         mist_username=os.environ.get('MIST_USERNAME'),
-        mist_password=os.environ.get('MIST_PASSWORD'),
+        mist_login_method=os.environ.get('MIST_LOGIN_METHOD'),
         site_group_ids=os.environ.get('SITE_GROUP_IDS'),
         org_id=os.environ.get('ORG_ID'),
         rf_template_id=os.environ.get('RF_TEMPLATE_ID'),

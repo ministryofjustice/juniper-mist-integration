@@ -1,14 +1,15 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from src.juniper import juniper_script, Admin, check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups
-
+from io import StringIO
 
 class TestJuniperScript(unittest.TestCase):
 
+    @patch('getpass.getpass', return_value='token')
     @patch('src.juniper.requests.Session.get', return_value=MagicMock(status_code=200))
     @patch('src.juniper.Admin.post')
     @patch('src.juniper.Admin.put')
-    def test_juniper_script(self, mock_put, mock_post, mock_successful_login):
+    def test_juniper_script(self, mock_put, mock_post, mock_successful_login, api_token):
         # Mock Mist API responses
         mock_post.return_value = {'id': '123', 'name': 'TestSite'}
         mock_put.return_value = {'status': 'success'}
@@ -24,7 +25,7 @@ class TestJuniperScript(unittest.TestCase):
         # Call the function
         juniper_script(
             data,
-            mist_api_token='your_token',
+            mist_login_method='token',
             org_id='your_org_id',
             site_group_ids='{"moj_wifi": "foo","gov_wifi": "bar"}',
             rf_template_id='8542a5fa-51e4-41be-83b9-acb416362cc0',
@@ -99,7 +100,7 @@ class TestJuniperScript(unittest.TestCase):
 
     def test_juniper_script_missing_site_group_ids(self):
         with self.assertRaises(ValueError) as cm:
-            juniper_script([], org_id='your_org_id', mist_api_token='token')
+            juniper_script([], org_id='your_org_id', mist_login_method='token')
 
         self.assertEqual(str(cm.exception),
                          'Must provide site_group_ids for GovWifi & MoJWifi')
@@ -109,7 +110,7 @@ class TestJuniperScript(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             juniper_script([],
                            org_id='your_org_id',
-                           mist_api_token='token',
+                           mist_login_method='token',
                            site_group_ids={
                 'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
                             'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
@@ -123,7 +124,7 @@ class TestJuniperScript(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             juniper_script([],
                            org_id='your_org_id',
-                           mist_api_token='token',
+                           mist_login_method='token',
                            site_group_ids={
                                'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
                                'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
@@ -132,53 +133,50 @@ class TestJuniperScript(unittest.TestCase):
 
         self.assertEqual(str(cm.exception), 'Must define network_template_id')
 
-    def test_juniper_script_missing_api_token(self):
-        # Test when mist_api_token is missing
-        with self.assertRaises(ValueError) as cm:
-            juniper_script([], org_id='your_org_id', mist_api_token=None)
 
-        self.assertEqual(str(
-            cm.exception), 'No authentication provided, provide mist username and password or API key')
+    @patch('src.juniper.Admin')
+    def test_given_mist_login_method_not_defined_then_default_to_credentials(self, mock_admin):
+        output_buffer = StringIO()
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            juniper_script([],
+                           org_id='your_org_id',
+                           site_group_ids={
+                               'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+                               'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
+                           rf_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061',
+                           network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061',
+                           mist_login_method=None
+                           )
+            actual_output = mock_stdout.getvalue()
+        expected_message = "mist_login_method not defined. Defaulting to credentials"
+        self.assertIn(expected_message, actual_output, f"Output should contain: '{expected_message}'")
 
-    def test_juniper_script_missing_password(self):
-        # Test when mist_api_token is missing
-        with self.assertRaises(ValueError) as cm:
-            juniper_script([], org_id='your_org_id', mist_username='username')
-
-        self.assertEqual(str(
-            cm.exception), 'No authentication provided, provide mist username and password or API key')
-
-    def test_juniper_script_missing_username(self):
-        # Test when mist_api_token is missing
-        with self.assertRaises(ValueError) as cm:
-            juniper_script([], org_id='your_org_id', mist_password='password')
-
-        self.assertEqual(str(
-            cm.exception), 'No authentication provided, provide mist username and password or API key')
 
     def test_juniper_script_missing_org_id(self):
-        # Test when org_id is missing
-        with self.assertRaises(ValueError) as cm:
-            juniper_script([], org_id=None)
+            # Test when org_id is missing
+            with self.assertRaises(ValueError) as cm:
+                juniper_script([], org_id=None)
 
-        self.assertEqual(str(cm.exception), 'Please provide Mist org_id')
+            self.assertEqual(str(cm.exception), 'Please provide Mist org_id')
 
     # Mocking the input function to provide a static MFA code
+    @patch('getpass.getpass', return_value='password')
     @patch('builtins.input', return_value='123456')
     @patch('src.juniper.requests.Session.post', return_value=MagicMock(status_code=200))
-    def test_login_successfully_via_username_and_password(self, mock_post, mock_input):
-        admin = Admin(username='test@example.com', password='password')
+    def test_login_successfully_via_username_and_password(self, mock_post, input_mfa, input_password):
+        admin = Admin(username='test@example.com', mist_login_method='credentials')
         self.assertIsNotNone(admin)
 
         mock_post.assert_called_with(
             'https://api.eu.mist.com/api/v1/login/two_factor', data={'two_factor': '123456'})
         self.assertEqual(mock_post.call_count, 2)
 
+    @patch('getpass.getpass', return_value='password')
     @patch('builtins.input', return_value='123456')
     @patch('src.juniper.requests.Session.post', return_value=MagicMock(status_code=400))
-    def test_given_valid_username_and_password_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self, mock_post, mock_input):
+    def test_given_valid_username_and_password_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self, mock_post, mfa_input, password_input):
         with self.assertRaises(ValueError) as context:
-            admin = Admin(username='test@example.com', password='password')
+            admin = Admin(username='test@example.com', mist_login_method='credentials')
 
         # Check the expected part of the exception message
         expected_error_message = "Login was not successful:"
@@ -193,13 +191,14 @@ class TestJuniperScript(unittest.TestCase):
         # Ensure the post method is called twice
         self.assertEqual(mock_post.call_count, 2)
 
+    @patch('getpass.getpass', return_value='test_token')
     @patch('src.juniper.requests.Session')
-    def test_given_valid_api_token_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self, mock_session):
+    def test_given_valid_api_token_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self, mock_session, api_token):
         mock_get = mock_session.return_value.get
         mock_get.return_value = MagicMock(status_code=400)
 
         with self.assertRaises(ValueError) as context:
-            admin = Admin(token='test_token')
+            admin = Admin(mist_login_method='token')
 
         # Check the expected part of the exception message
         expected_error_message = "Login was not successful via token:"
@@ -214,16 +213,17 @@ class TestJuniperScript(unittest.TestCase):
 
         self.assertEqual(mock_get.call_count, 1)
 
+    @patch('getpass.getpass', return_value='token')
     @patch('src.juniper.requests.Session.get', return_value=MagicMock(status_code=200))
     @patch('src.juniper.requests.Session.post')
-    def test_post(self, mock_post, mock_successful_login):
+    def test_post(self, mock_post, mock_successful_login, input_api_token):
         # Set up the mock to return a response with a valid JSON payload
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.text = '{"key": "value"}'
         mock_post.return_value = mock_response
 
-        admin = Admin(token='test_token')
+        admin = Admin(mist_login_method='token')
         self.assertIsNotNone(admin)
 
         result = admin.post('/some_endpoint', {'key': 'value'})
@@ -233,16 +233,17 @@ class TestJuniperScript(unittest.TestCase):
         expected_result = {'key': 'value'}
         self.assertEqual(result, expected_result)
 
+    @patch('getpass.getpass', return_value='token')
     @patch('src.juniper.requests.Session.get', return_value=MagicMock(status_code=200))
     @patch('src.juniper.requests.Session.put')
-    def test_put(self, mock_put, mock_successful_login):
+    def test_put(self, mock_put, mock_successful_login, input_api_token):
         # Set up the mock to return a response with a valid JSON payload
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.text = '{"key": "value"}'
         mock_put.return_value = mock_response
 
-        admin = Admin(token='test_token')
+        admin = Admin(mist_login_method='token')
         self.assertIsNotNone(admin)
 
         # Call the method being tested
