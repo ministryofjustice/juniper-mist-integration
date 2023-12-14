@@ -1,16 +1,19 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.juniper import juniper_script, Admin, check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups, warn_if_using_org_id_production
+from src.juniper import juniper_script, Admin, check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups, warn_if_using_org_id_production, plan_of_action
 from io import StringIO
+from datetime import datetime
+import os
 
 
 class TestJuniperScript(unittest.TestCase):
 
+    @patch('src.juniper.plan_of_action')
     @patch('getpass.getpass', return_value='token')
     @patch('src.juniper.requests.Session.get', return_value=MagicMock(status_code=200))
     @patch('src.juniper.Admin.post')
     @patch('src.juniper.Admin.put')
-    def test_juniper_script(self, mock_put, mock_post, mock_successful_login, api_token):
+    def test_juniper_script(self, mock_put, mock_post, mock_successful_login, api_token, mock_plan_of_action):
         # Mock Mist API responses
         mock_post.return_value = {'id': '123', 'name': 'TestSite'}
         mock_put.return_value = {'status': 'success'}
@@ -154,8 +157,9 @@ class TestJuniperScript(unittest.TestCase):
 
         self.assertEqual(str(cm.exception), 'Must define network_template_id')
 
+    @patch('src.juniper.plan_of_action')
     @patch('src.juniper.Admin')
-    def test_given_mist_login_method_not_defined_then_default_to_credentials(self, mock_admin):
+    def test_given_mist_login_method_not_defined_then_default_to_credentials(self, mock_admin, mock_plan_of_action):
         output_buffer = StringIO()
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
             juniper_script([],
@@ -316,3 +320,34 @@ class TestCheckIfNeedToAppend(unittest.TestCase):
         result = check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
             gov_wifi, moj_wifi, self.site_group_ids)
         self.assertEqual(result, [])
+
+class TestPlanOfActionFunction(unittest.TestCase):
+
+    def setUp(self):
+        self.data = {'Site Name': 'TestSite', 'Site Address': '123 Main St',
+             'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC',
+             'Enable GovWifi': 'true', 'Enable MoJWifi': 'false',
+             'Wired NACS Radius Key': 'key1', 'GovWifi Radius Key': 'key2'},
+        self.rf_template_id = "rf_template_id",
+        self.network_template_id = "network_template_id",
+        self.site_group_ids = '{"moj_wifi": "foo","gov_wifi": "bar"}'
+
+    def test_plan_of_action_creates_file(self):
+        with patch('builtins.input', return_value='Y'), patch('sys.exit') as mock_exit:
+            plan_of_action(self.data, self.rf_template_id, self.network_template_id, self.site_group_ids)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        expected_file_name = f"../data_src/mist_plan_{timestamp}.json"
+        self.assertTrue(os.path.exists(expected_file_name))
+        os.remove(expected_file_name)
+
+    @patch("builtins.open")
+    def test_plan_of_action_exit_on_no(self, mock_open_file):
+        with patch('builtins.input', return_value='N'), self.assertRaises(SystemExit) as cm:
+            plan_of_action(self.data, self.rf_template_id, self.network_template_id, self.site_group_ids)
+        self.assertEqual(cm.exception.code, 0)
+
+    @patch("builtins.open")
+    def test_plan_of_action_invalid_input(self, mock_open_file):
+        with patch('builtins.input', return_value='invalid_input'), self.assertRaises(ValueError) as cm:
+            plan_of_action(self.data, self.rf_template_id, self.network_template_id, self.site_group_ids)
+        self.assertEqual(str(cm.exception), 'Invalid input')
