@@ -81,6 +81,7 @@ run-dev: ## Run the python script while mounting the host. This enables using th
 tests: ## Run unit tests for the python app
 	docker run -v $(shell pwd)/src:/app/src \
 		-v $(shell pwd)/test:/app/test \
+		-v $(shell pwd)/data_src:/data_src \
 		-e RUN_UNIT_TESTS=True $(NAME)
 
 .PHONY: shell

@@ -2,6 +2,7 @@ import requests
 import json
 import getpass
 import sys
+from datetime import datetime
 
 # Mist CRUD operations
 
@@ -117,9 +118,127 @@ def warn_if_using_org_id_production(org_id):
         else:
             raise ValueError('Invalid input')
 
+
+def build_payload(
+        d,
+        rf_template_id,
+        network_template_id,
+        site_group_ids
+):
+    site = {'name': d.get('Site Name', ''),
+            'address': d.get('Site Address', ''),
+            "latlng": {"lat": d.get('gps', '')[0], "lng": d.get('gps', '')[1]},
+            "country_code": d.get('country_code', ''),
+            "rftemplate_id": rf_template_id,
+            "networktemplate_id": network_template_id,
+            "timezone": d.get('time_zone', ''),
+            "sitegroup_ids": check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
+                gov_wifi=d.get('Enable GovWifi', ''),
+                moj_wifi=d.get('Enable MoJWifi', ''),
+                site_group_ids=json.loads(site_group_ids)
+    ),
+    }
+    # MOJ specific attributes
+    site_setting = {
+
+        "auto_upgrade": {
+            "enabled": True,
+            "version": "custom",
+            "time_of_day": "02:00",
+            "custom_versions": {
+                "AP45": "0.12.27066",
+                "AP32": "0.12.27066"
+            },
+            "day_of_week": ""
+        },
+
+        "rogue": {
+            "min_rssi": -80,
+            "min_duration": 20,
+            "enabled": True,
+            "honeypot_enabled": True,
+            "whitelisted_bssids": [
+                ""
+            ],
+            "whitelisted_ssids": [
+                "GovWifi"
+            ]
+        },
+
+        "persist_config_on_device": True,
+
+        "engagement": {
+            "dwell_tags": {
+                "passerby": "1-300",
+                "bounce": "3600-14400",
+                "engaged": "25200-36000",
+                "stationed": "50400-86400"
+            },
+            "dwell_tag_names": {
+                "passerby": "Below 5 Min (Passerby)",
+                "bounce": "1-4 Hours",
+                "engaged": "7-10 Hours",
+                "stationed": "14-24 Hours"
+            }
+        },
+        "analytic": {
+            "enabled": True
+        },
+
+        "vars": {
+            "site_specific_radius_wired_nacs_secret": d.get('Wired NACS Radius Key', ''),
+            "site_specific_radius_govwifi_secret": d.get('GovWifi Radius Key', ''),
+            "address": d.get('Site Address', ''),
+            "site_name": d.get('Site Name', '')
+        }
+
+    }
+    return site, site_setting
+
+
+def plan_of_action(
+        data,
+        rf_template_id,
+        network_template_id,
+        site_group_ids
+):
+
+    # Generate a timestamp for the filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    plan_file_name = "../data_src/mist_plan_{time}.json".format(time=timestamp)
+    json_objects = []
+
+    for d in data:
+        site, site_setting = build_payload(
+            d,
+            rf_template_id,
+            network_template_id,
+            site_group_ids
+        )
+        json_objects.append(site)
+        json_objects.append(site_setting)
+
+    # Load file
+    with open(plan_file_name, "w") as plan_file:
+        json.dump(json_objects, plan_file, indent=2)
+
+    # Print to terminal
+    with open(plan_file_name, "r") as plan_file:
+        print(plan_file.read())
+
+    print("A file containing all the changes has been created: {file}".format(
+        file=plan_file_name))
+    user_input = input("Do you wish to continue? (y/n): ").upper()
+
+    if user_input == "Y":
+        print("Continuing with run")
+    elif user_input == "N":
+        sys.exit(0)
+    else:
+        raise ValueError('Invalid input')
+
+
 # Main function
-
-
 def juniper_script(
         data,
         org_id=None,
@@ -129,7 +248,6 @@ def juniper_script(
         rf_template_id=None,
         network_template_id=None
 ):
-
     # Configure True/False to enable/disable additional logging of the API response objects
     show_more_details = True
 
@@ -149,6 +267,13 @@ def juniper_script(
     # Prompt user if we are using production org_id
     warn_if_using_org_id_production(org_id)
 
+    plan_of_action(
+        data,
+        rf_template_id,
+        network_template_id,
+        site_group_ids
+    )
+
     # Establish Mist session
     admin = Admin(mist_username, mist_login_method)
 
@@ -156,76 +281,13 @@ def juniper_script(
     for d in data:
         # Variables
         site_id = None
-        site = {'name': d.get('Site Name', ''),
-                'address': d.get('Site Address', ''),
-                "latlng": {"lat": d.get('gps', '')[0], "lng": d.get('gps', '')[1]},
-                "country_code": d.get('country_code', ''),
-                "rftemplate_id": rf_template_id,
-                "networktemplate_id": network_template_id,
-                "timezone": d.get('time_zone', ''),
-                "sitegroup_ids": check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
-                    gov_wifi=d.get('Enable GovWifi', ''),
-                    moj_wifi=d.get('Enable MoJWifi', ''),
-                    site_group_ids=json.loads(site_group_ids)
-        ),
-        }
 
-        # MOJ specific attributes
-        site_setting = {
-
-            "auto_upgrade": {
-                "enabled": True,
-                "version": "custom",
-                "time_of_day": "02:00",
-                "custom_versions": {
-                    "AP45": "0.12.27066",
-                    "AP32": "0.12.27066"
-                },
-                "day_of_week": ""
-            },
-
-            "rogue": {
-                "min_rssi": -80,
-                "min_duration": 20,
-                "enabled": True,
-                "honeypot_enabled": True,
-                "whitelisted_bssids": [
-                    ""
-                ],
-                "whitelisted_ssids": [
-                    "GovWifi"
-                ]
-            },
-
-            "persist_config_on_device": True,
-
-            "engagement": {
-                "dwell_tags": {
-                    "passerby": "1-300",
-                    "bounce": "3600-14400",
-                    "engaged": "25200-36000",
-                    "stationed": "50400-86400"
-                },
-                "dwell_tag_names": {
-                    "passerby": "Below 5 Min (Passerby)",
-                    "bounce": "1-4 Hours",
-                    "engaged": "7-10 Hours",
-                    "stationed": "14-24 Hours"
-                }
-            },
-            "analytic": {
-                "enabled": True
-            },
-
-            "vars": {
-                "site_specific_radius_wired_nacs_secret": d.get('Wired NACS Radius Key', ''),
-                "site_specific_radius_govwifi_secret": d.get('GovWifi Radius Key', ''),
-                "address": d.get('Site Address', ''),
-                "site_name": d.get('Site Name', '')
-            },
-
-
-        }
+        site, site_setting = build_payload(
+            d,
+            rf_template_id,
+            network_template_id,
+            site_group_ids
+        )
 
         print('Calling the Mist Create Site API...')
         result = admin.post('/api/v1/orgs/' + org_id + '/sites', site)
@@ -243,8 +305,6 @@ def juniper_script(
                 print('\nRetrieving the JSON response object...')
                 print(json.dumps(result, sort_keys=True, indent=4))
                 print('\nUsing id in the Mist Update Setting API request')
-
-        print()
 
         # Update Site Setting
         print('Calling the Mist Update Setting API...')
