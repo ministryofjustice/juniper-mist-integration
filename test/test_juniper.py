@@ -321,20 +321,22 @@ class TestCheckIfNeedToAppend(unittest.TestCase):
             gov_wifi, moj_wifi, self.site_group_ids)
         self.assertEqual(result, [])
 
+
 class TestPlanOfActionFunction(unittest.TestCase):
 
     def setUp(self):
         self.data = {'Site Name': 'TestSite', 'Site Address': '123 Main St',
-             'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC',
-             'Enable GovWifi': 'true', 'Enable MoJWifi': 'false',
-             'Wired NACS Radius Key': 'key1', 'GovWifi Radius Key': 'key2'},
+                     'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC',
+                     'Enable GovWifi': 'true', 'Enable MoJWifi': 'false',
+                     'Wired NACS Radius Key': 'key1', 'GovWifi Radius Key': 'key2'},
         self.rf_template_id = "rf_template_id",
         self.network_template_id = "network_template_id",
         self.site_group_ids = '{"moj_wifi": "foo","gov_wifi": "bar"}'
 
     def test_plan_of_action_creates_file(self):
         with patch('builtins.input', return_value='Y'), patch('sys.exit') as mock_exit:
-            plan_of_action(self.data, self.rf_template_id, self.network_template_id, self.site_group_ids)
+            plan_of_action(self.data, self.rf_template_id,
+                           self.network_template_id, self.site_group_ids)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         expected_file_name = f"../data_src/mist_plan_{timestamp}.json"
         self.assertTrue(os.path.exists(expected_file_name))
@@ -343,11 +345,13 @@ class TestPlanOfActionFunction(unittest.TestCase):
     @patch("builtins.open")
     def test_plan_of_action_exit_on_no(self, mock_open_file):
         with patch('builtins.input', return_value='N'), self.assertRaises(SystemExit) as cm:
-            plan_of_action(self.data, self.rf_template_id, self.network_template_id, self.site_group_ids)
+            plan_of_action(self.data, self.rf_template_id,
+                           self.network_template_id, self.site_group_ids)
         self.assertEqual(cm.exception.code, 0)
 
     @patch("builtins.open")
     def test_plan_of_action_invalid_input(self, mock_open_file):
         with patch('builtins.input', return_value='invalid_input'), self.assertRaises(ValueError) as cm:
-            plan_of_action(self.data, self.rf_template_id, self.network_template_id, self.site_group_ids)
+            plan_of_action(self.data, self.rf_template_id,
+                           self.network_template_id, self.site_group_ids)
         self.assertEqual(str(cm.exception), 'Invalid input')

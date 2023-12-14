@@ -136,8 +136,8 @@ def build_payload(
                 gov_wifi=d.get('Enable GovWifi', ''),
                 moj_wifi=d.get('Enable MoJWifi', ''),
                 site_group_ids=json.loads(site_group_ids)
-            ),
-            }
+    ),
+    }
     # MOJ specific attributes
     site_setting = {
 
@@ -195,6 +195,7 @@ def build_payload(
     }
     return site, site_setting
 
+
 def plan_of_action(
         data,
         rf_template_id,
@@ -225,7 +226,8 @@ def plan_of_action(
     with open(plan_file_name, "r") as plan_file:
         print(plan_file.read())
 
-    print("A file containing all the changes has been created: {file}".format(file=plan_file_name))
+    print("A file containing all the changes has been created: {file}".format(
+        file=plan_file_name))
     user_input = input("Do you wish to continue? (y/n): ").upper()
 
     if user_input == "Y":
