@@ -146,8 +146,8 @@ def build_payload(
             "version": "custom",
             "time_of_day": "02:00",
             "custom_versions": {
-                "AP45": "0.12.27066",
-                "AP32": "0.12.27066"
+                "AP45": "0.12.27139",
+                "AP32": "0.12.27139"
             },
             "day_of_week": ""
         },
