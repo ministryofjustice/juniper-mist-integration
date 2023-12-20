@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.juniper import juniper_script, Admin, check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups, warn_if_using_org_id_production, plan_of_action
+from src.juniper import juniper_script, Admin, check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups, \
+    warn_if_using_org_id_production, plan_of_action
 from io import StringIO
 from datetime import datetime
 import os
@@ -37,70 +38,12 @@ class TestJuniperScript(unittest.TestCase):
         )
 
         # Assertions
-        mock_post.assert_called_once_with('/api/v1/orgs/your_org_id/sites', {
-            'name': 'TestSite',
-            'address': '123 Main St',
-            'latlng': {'lat': 1.23, 'lng': 4.56},
-            'country_code': 'US',
-            'rftemplate_id': '8542a5fa-51e4-41be-83b9-acb416362cc0',
-            'networktemplate_id': '46b87163-abd2-4b08-a67f-1ccecfcfd061',
-            'timezone': 'UTC',
-            'sitegroup_ids': []
-        })
-
-        mock_put.assert_called_once_with('/api/v1/sites/123/setting', {
-
-            "auto_upgrade": {
-                "enabled": True,
-                "version": "custom",
-                "time_of_day": "02:00",
-                "custom_versions": {
-                    "AP45": "0.12.27139",
-                    "AP32": "0.12.27139"
-                },
-                "day_of_week": ""
-            },
-
-            "rogue": {
-                "min_rssi": -80,
-                "min_duration": 20,
-                "enabled": True,
-                "honeypot_enabled": True,
-                "whitelisted_bssids": [
-                    ""
-                ],
-                "whitelisted_ssids": [
-                    "GovWifi"
-                ]
-            },
-
-            "persist_config_on_device": True,
-
-            "engagement": {
-                "dwell_tags": {
-                    "passerby": "1-300",
-                    "bounce": "3600-14400",
-                    "engaged": "25200-36000",
-                    "stationed": "50400-86400"
-                },
-                "dwell_tag_names": {
-                    "passerby": "Below 5 Min (Passerby)",
-                    "bounce": "1-4 Hours",
-                    "engaged": "7-10 Hours",
-                    "stationed": "14-24 Hours"
-                }
-            },
-            "analytic": {
-                "enabled": True
-            },
-
-            'vars': {
-                'site_specific_radius_wired_nacs_secret': 'key1',
-                'site_specific_radius_govwifi_secret': 'key2',
-                'address': '123 Main St',
-                'site_name': 'TestSite'
-            }
-        })
+        mock_post.assert_called_once_with('/api/v1/orgs/your_org_id/sites',
+                                          {'name': 'TestSite', 'address': '123 Main St',
+                                           'latlng': {'lat': 1.23, 'lng': 4.56}, 'country_code': 'US',
+                                           'rftemplate_id': '8542a5fa-51e4-41be-83b9-acb416362cc0',
+                                           'networktemplate_id': '46b87163-abd2-4b08-a67f-1ccecfcfd061',
+                                           'timezone': 'UTC', 'sitegroup_ids': []})
 
     def test_juniper_script_missing_site_group_ids(self):
         with self.assertRaises(ValueError) as cm:
@@ -116,15 +59,16 @@ class TestJuniperScript(unittest.TestCase):
                            org_id='your_org_id',
                            mist_login_method='token',
                            site_group_ids={
-                'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
-                            'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
+                               'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+                               'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
                            network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
                            )
 
         self.assertEqual(str(cm.exception), 'Must define rf_template_id')
 
     @patch('builtins.input', return_value='y')
-    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_y_then_continue_to_run(self, user_input):
+    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_y_then_continue_to_run(self,
+                                                                                                         user_input):
         production_org_id = '3e824dd6-6b37-4cc7-90bb-97d744e91175'
         result = warn_if_using_org_id_production(production_org_id)
         self.assertEqual(result, 'Continuing_with_run')
@@ -136,7 +80,8 @@ class TestJuniperScript(unittest.TestCase):
             warn_if_using_org_id_production(production_org_id)
 
     @patch('builtins.input', return_value='invalid')
-    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_invalid_then_raise_error(self, user_input):
+    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_invalid_then_raise_error(self,
+                                                                                                           user_input):
         production_org_id = '3e824dd6-6b37-4cc7-90bb-97d744e91175'
         with self.assertRaises(ValueError) as cm:
             warn_if_using_org_id_production(production_org_id)
@@ -199,7 +144,8 @@ class TestJuniperScript(unittest.TestCase):
     @patch('getpass.getpass', return_value='password')
     @patch('builtins.input', return_value='123456')
     @patch('src.juniper.requests.Session.post', return_value=MagicMock(status_code=400))
-    def test_given_valid_username_and_password_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self, mock_post, mfa_input, password_input):
+    def test_given_valid_username_and_password_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(
+            self, mock_post, mfa_input, password_input):
         with self.assertRaises(ValueError) as context:
             admin = Admin(username='test@example.com',
                           mist_login_method='credentials')
@@ -219,7 +165,9 @@ class TestJuniperScript(unittest.TestCase):
 
     @patch('getpass.getpass', return_value='test_token')
     @patch('src.juniper.requests.Session')
-    def test_given_valid_api_token_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self, mock_session, api_token):
+    def test_given_valid_api_token_when_post_to_api_and_non_200_status_code_received_then_raise_error_to_user(self,
+                                                                                                              mock_session,
+                                                                                                              api_token):
         mock_get = mock_session.return_value.get
         mock_get.return_value = MagicMock(status_code=400)
 

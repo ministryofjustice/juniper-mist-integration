@@ -179,11 +179,96 @@ def build_payload(
                 "bounce": "1-4 Hours",
                 "engaged": "7-10 Hours",
                 "stationed": "14-24 Hours"
+            },
+            "hours": {
+                "sun": None,
+                "mon": None,
+                "tue": None,
+                "wed": None,
+                "thu": None,
+                "fri": None,
+                "sat": None
             }
         },
         "analytic": {
             "enabled": True
         },
+
+        "rtsa": {
+            "enabled": False,
+            "track_asset": False,
+            "app_waking": False
+        },
+        "led": {
+            "enabled": True,
+            "brightness": 255
+        },
+        "wifi": {
+            "enabled": True,
+            "locate_unconnected": True,
+            "mesh_enabled": True,
+            "mesh_allow_dfs": True
+        },
+
+        "switch_mgmt": {
+            "use_mxedge_proxy": False,
+            "mxedge_proxy_port": "2222"
+        },
+
+        "wootcloud": None,
+        "skyatp": {
+            "enabled": None,
+            "send_ip_mac_mapping": None
+        },
+
+        "mgmt": {
+            "use_wxtunnel": False
+        },
+
+        "config_auto_revert": True,
+        "status_portal": {
+            "enabled": False,
+            "hostnames": [
+                ""
+            ]
+        },
+        "uplink_port_config": {
+            "keep_wlans_up_if_down": True
+        },
+        "ssh_keys": [],
+        "wids": {},
+        "mxtunnel": {
+            "enabled": False
+        },
+        "occupancy": {
+            "min_duration": None,
+            "clients_enabled": False,
+            "sdkclients_enabled": False,
+            "assets_enabled": False,
+            "unconnected_clients_enabled": False
+        },
+        "public_zone_occupancy": {
+            "enabled": False,
+            "client_density_enabled": False,
+            "rssi_zones_enabled": False
+        },
+        "zone_occupancy_alert": {
+            "enabled": False,
+            "threshold": 5,
+            "email_notifiers": []
+        },
+        "gateway_mgmt": {
+            "app_usage": False,
+            "security_log_source_interface": "",
+            "auto_signature_update": {
+                "enable": True,
+                "time_of_day": "02:00",
+                "day_of_week": ""
+            }
+        },
+        "tunterm_monitoring": [],
+        "tunterm_monitoring_disabled": True,
+        "ssr": {},
 
         "vars": {
             "site_specific_radius_wired_nacs_secret": d.get('Wired NACS Radius Key', ''),
