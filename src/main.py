@@ -5,6 +5,7 @@ import os
 import csv
 from geocode import geocode, find_timezone, find_country_code
 
+
 def clean_csv_rows_by_removing_nbsp(unformatted_csv_rows):
     cleaned_rows = []
 
@@ -23,6 +24,8 @@ def clean_csv_rows_by_removing_nbsp(unformatted_csv_rows):
     return cleaned_rows
 
 # Convert CSV file to JSON object.
+
+
 def convert_csv_to_json(file_path):
     csv_rows = []
     with open(file_path) as csvfile:
@@ -64,7 +67,8 @@ if __name__ == '__main__':
     # Convert CSV to valid JSON
     json_data_without_geocoding = convert_csv_to_json(csv_file_path)
 
-    clean_json_data_without_geocoding = clean_csv_rows_by_removing_nbsp(json_data_without_geocoding)
+    clean_json_data_without_geocoding = clean_csv_rows_by_removing_nbsp(
+        json_data_without_geocoding)
 
     json_data_with_geocoding = add_geocoding_to_json(
         clean_json_data_without_geocoding)
