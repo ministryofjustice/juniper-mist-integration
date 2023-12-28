@@ -116,11 +116,55 @@ class TestCleanCSVRows(unittest.TestCase):
         output_data = clean_csv_rows_by_removing_nbsp(input_data)
         self.assertEqual(output_data, input_data, "No non-breaking spaces, should be unchanged")
 
-    def test_clean_csv_rows_with_nbsp(self):
+    def test_keys_clean_csv_rows_with_nbsp(self):
         input_data = [
             {'Site\xa0Name': 'non breaking space test', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'Enable GovWifi': ' "TRUE"',
              'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
             {'Site Name': 'non breaking space test', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'}
+        ]
+        expected_output = [{'Enable GovWifi': ' "TRUE"',
+                            'Enable MoJWifi': ' "FALSE"',
+                            'GovWifi Radius Key': '0D0E0DDE080BC0EEE000',
+                            'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
+                            'Site Name': 'non breaking space test',
+                            'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
+                           {'Enable GovWifi': ' "TRUE"',
+                            'Enable MoJWifi': ' "FALSE"',
+                            'GovWifi Radius Key': '0D0E0DDE080BC0EEE000',
+                            'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
+                            'Site Name': 'non breaking space test',
+                            'Wired NACS Radius Key': '00000DD0000BC0EEE000'}]
+        output_data = clean_csv_rows_by_removing_nbsp(input_data)
+        self.assertEqual(output_data, expected_output, "Non-breaking spaces should be removed")
+
+    def test_values_clean_csv_rows_with_nbsp(self):
+        input_data = [
+            {'Site Name': 'non\xa0breaking\xa0space\xa0test', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
+            {'Site Name': 'non breaking\xa0space test', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1\xa03PB', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'}
+        ]
+        expected_output = [{'Enable GovWifi': ' "TRUE"',
+                            'Enable MoJWifi': ' "FALSE"',
+                            'GovWifi Radius Key': '0D0E0DDE080BC0EEE000',
+                            'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
+                            'Site Name': 'non breaking space test',
+                            'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
+                           {'Enable GovWifi': ' "TRUE"',
+                            'Enable MoJWifi': ' "FALSE"',
+                            'GovWifi Radius Key': '0D0E0DDE080BC0EEE000',
+                            'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
+                            'Site Name': 'non breaking space test',
+                            'Wired NACS Radius Key': '00000DD0000BC0EEE000'}]
+        output_data = clean_csv_rows_by_removing_nbsp(input_data)
+        self.assertEqual(output_data, expected_output, "Non-breaking spaces should be removed")
+
+    def test_keys_and_values_clean_csv_rows_with_nbsp(self):
+        input_data = [
+            {'Site\xa0Name': 'non breaking\xa0space\xa0test', 'Site Address': 'Met Office, FitzRoy\xa0Road, Exeter, Devon, EX1 3PB', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired\xa0NACS Radius Key': '00000DD0000BC0EEE000'},
+            {'Site Name': 'non breaking space test', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1\xa03PB', 'Enable GovWifi': ' "TRUE"',
              'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'}
         ]
         expected_output = [{'Enable GovWifi': ' "TRUE"',
