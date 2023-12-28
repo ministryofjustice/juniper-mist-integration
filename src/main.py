@@ -20,7 +20,6 @@ def clean_csv_rows_by_removing_nbsp(unformatted_csv_rows):
             # Add the cleaned key-value pair to the new dictionary
             cleaned_dict[cleaned_key] = cleaned_value
 
-
         cleaned_rows.append(cleaned_dict)
 
     return cleaned_rows

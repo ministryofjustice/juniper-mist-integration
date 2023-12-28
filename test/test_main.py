@@ -160,7 +160,8 @@ class TestCleanCSVRows(unittest.TestCase):
                             'Site Name': 'non breaking space test',
                             'Wired NACS Radius Key': '00000DD0000BC0EEE000'}]
         output_data = clean_csv_rows_by_removing_nbsp(input_data)
-        self.assertEqual(output_data, expected_output, "Non-breaking spaces should be removed")
+        self.assertEqual(output_data, expected_output,
+                         "Non-breaking spaces should be removed")
 
     def test_keys_and_values_clean_csv_rows_with_nbsp(self):
         input_data = [
@@ -182,4 +183,5 @@ class TestCleanCSVRows(unittest.TestCase):
                             'Site Name': 'non breaking space test',
                             'Wired NACS Radius Key': '00000DD0000BC0EEE000'}]
         output_data = clean_csv_rows_by_removing_nbsp(input_data)
-        self.assertEqual(output_data, expected_output, "Non-breaking spaces should be removed")
+        self.assertEqual(output_data, expected_output,
+                         "Non-breaking spaces should be removed")
