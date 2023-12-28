@@ -2,7 +2,7 @@ import unittest
 import tempfile
 import csv
 from unittest.mock import patch
-from src.main import convert_csv_to_json, add_geocoding_to_json
+from src.main import convert_csv_to_json, add_geocoding_to_json, clean_csv_rows_by_removing_nbsp
 
 
 class TestCsvToJson(unittest.TestCase):
@@ -15,7 +15,19 @@ class TestCsvToJson(unittest.TestCase):
             {'Site Name': 'Test location 2', 'Site Address': '102 Petty France, London SW1H 9AJ', 'Enable GovWifi': ' "TRUE"',
                 'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE000BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
             {'Site Name': 'Test location 3', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'Enable GovWifi': ' "TRUE"',
-                'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'}
+                'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
+            {'Site Name': 'non\xa0breaking\xa0space\xa0test', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'}
+        ]
+        self.csv_data_expected = [
+            {'Site Name': 'Test location 1', 'Site Address': '40 Mayflower Dr, Plymouth PL2 3DG', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '00000DD0000BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
+            {'Site Name': 'Test location 2', 'Site Address': '102 Petty France, London SW1H 9AJ', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE000BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
+            {'Site Name': 'Test location 3', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
+            {'Site Name': 'non breaking space test', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'}
         ]
         self.csv_file = tempfile.NamedTemporaryFile(
             mode='w', delete=False, newline='', suffix='.csv')
@@ -28,11 +40,11 @@ class TestCsvToJson(unittest.TestCase):
             'Wired NACS Radius Key'
         ])
         self.csv_writer.writeheader()
-        self.csv_writer.writerows(self.csv_data)
+        self.csv_writer.writerows(self.csv_data_expected)
         self.csv_file.close()
 
     def test_convert_csv_to_json_valid_csv(self):
-        expected_json = self.csv_data
+        expected_json = self.csv_data_expected
         actual_json = convert_csv_to_json(self.csv_file.name)
         self.assertEqual(actual_json, expected_json)
 
@@ -90,3 +102,38 @@ class TestAddGeocodingToJson(unittest.TestCase):
         find_timezone.assert_called()
         mock_find_country_code.assert_called()
         mock_geocode.assert_called()
+
+
+class TestCleanCSVRows(unittest.TestCase):
+
+    def test_clean_csv_rows_no_nbsp(self):
+        input_data = [
+            {'Site Name': 'Test location 1', 'Site Address': '40 Mayflower Dr, Plymouth PL2 3DG', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '00000DD0000BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
+            {'Site Name': 'Test location 2', 'Site Address': '102 Petty France, London SW1H 9AJ', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE000BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'}
+        ]
+        output_data = clean_csv_rows_by_removing_nbsp(input_data)
+        self.assertEqual(output_data, input_data, "No non-breaking spaces, should be unchanged")
+
+    def test_clean_csv_rows_with_nbsp(self):
+        input_data = [
+            {'Site\xa0Name': 'non breaking space test', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
+            {'Site Name': 'non breaking space test', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'Enable GovWifi': ' "TRUE"',
+             'Enable MoJWifi': ' "FALSE"', 'GovWifi Radius Key': '0D0E0DDE080BC0EEE000', 'Wired NACS Radius Key': '00000DD0000BC0EEE000'}
+        ]
+        expected_output = [{'Enable GovWifi': ' "TRUE"',
+                            'Enable MoJWifi': ' "FALSE"',
+                            'GovWifi Radius Key': '0D0E0DDE080BC0EEE000',
+                            'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
+                            'Site Name': 'non breaking space test',
+                            'Wired NACS Radius Key': '00000DD0000BC0EEE000'},
+                           {'Enable GovWifi': ' "TRUE"',
+                            'Enable MoJWifi': ' "FALSE"',
+                            'GovWifi Radius Key': '0D0E0DDE080BC0EEE000',
+                            'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
+                            'Site Name': 'non breaking space test',
+                            'Wired NACS Radius Key': '00000DD0000BC0EEE000'}]
+        output_data = clean_csv_rows_by_removing_nbsp(input_data)
+        self.assertEqual(output_data, expected_output, "Non-breaking spaces should be removed")

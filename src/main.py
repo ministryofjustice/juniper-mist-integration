@@ -6,13 +6,21 @@ import csv
 from geocode import geocode, find_timezone, find_country_code
 
 def clean_csv_rows_by_removing_nbsp(unformatted_csv_rows):
+    cleaned_rows = []
+
     for data_dict in unformatted_csv_rows:
-        for key in data_dict:
+        cleaned_dict = {}
+
+        for key, value in data_dict.items():
+            # Replace '\xa0' with a regular space in the keys
             cleaned_key = key.replace('\xa0', ' ')
 
-            data_dict[cleaned_key] = data_dict.pop(key)
+            # Add the cleaned key-value pair to the new dictionary
+            cleaned_dict[cleaned_key] = value
 
-    return unformatted_csv_rows
+        cleaned_rows.append(cleaned_dict)
+
+    return cleaned_rows
 
 # Convert CSV file to JSON object.
 def convert_csv_to_json(file_path):
@@ -59,7 +67,7 @@ if __name__ == '__main__':
     clean_json_data_without_geocoding = clean_csv_rows_by_removing_nbsp(json_data_without_geocoding)
 
     json_data_with_geocoding = add_geocoding_to_json(
-        json_data_without_geocoding)
+        clean_json_data_without_geocoding)
 
     juniper_script(
         mist_username=os.environ.get('MIST_USERNAME'),
