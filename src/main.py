@@ -5,6 +5,13 @@ import os
 import csv
 from geocode import geocode, find_timezone, find_country_code
 
+# Strip non-breaking-space invisible characters
+def replace_non_breaking_spaces(unsanitised, clean):
+    with open(unsanitised, "r") as input:
+        with open(clean, "w") as output:
+            for line in input:
+                line = line.replace("\xa0", " ")
+                output.write(line)
 
 # Convert CSV file to JSON object.
 def convert_csv_to_json(file_path):
@@ -43,7 +50,11 @@ def add_geocoding_to_json(data):
 
 if __name__ == '__main__':
 
-    csv_file_path = os.getcwd() + '/../data_src/sites_with_clients.csv'
+    unsanitised_csv_file_path = os.getcwd() + '/../data_src/sites_with_clients.csv'
+    csv_file_path = os.getcwd() + '/../data_src/sites_with_clients.clean.csv'
+
+    # Strip non-breaking-space invisible characters
+    replace_non_breaking_spaces(unsanitised_csv_file_path, csv_file_path)
 
     # Convert CSV to valid JSON
     json_data_without_geocoding = convert_csv_to_json(csv_file_path)
