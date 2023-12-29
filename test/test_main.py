@@ -91,8 +91,6 @@ class TestCsvToJson(unittest.TestCase):
         self.assertEqual(actual_json, expected_json)
 
 
-
-
 class TestAddGeocodingToJson(unittest.TestCase):
 
     @patch('src.main.geocode', side_effect=[
