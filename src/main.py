@@ -6,6 +6,8 @@ import csv
 from geocode import geocode, find_timezone, find_country_code
 
 # Strip non-breaking-space invisible characters
+
+
 def replace_non_breaking_spaces(unsanitised, clean):
     with open(unsanitised, "r") as input:
         with open(clean, "w") as output:
@@ -14,6 +16,8 @@ def replace_non_breaking_spaces(unsanitised, clean):
                 output.write(line)
 
 # Convert CSV file to JSON object.
+
+
 def convert_csv_to_json(file_path):
     csv_rows = []
     with open(file_path) as csvfile:
