@@ -1,5 +1,8 @@
 FROM python:3.11.5
 
+# Set a default value for AP_VERSIONS
+ENV AP_VERSIONS='{"AP45": "0.12.27139", "AP32": "0.12.27139"}'
+
 # Set the working directory to /app
 WORKDIR /app
 
