@@ -245,6 +245,7 @@ class TestJuniperScript(unittest.TestCase):
                 # Attempt to parse invalid JSON, should raise ValueError
                 admin.get_ap_versions()
 
+
 class TestCheckIfNeedToAppend(unittest.TestCase):
 
     def setUp(self):
