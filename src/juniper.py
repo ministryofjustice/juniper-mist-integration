@@ -13,9 +13,15 @@ class Admin:
 
     @staticmethod
     def get_ap_versions():
+        # Get AP versions from environment variable
         ap_versions_str = os.getenv('AP_VERSIONS', '{}')
         try:
-            return json.loads(ap_versions_str)
+            # Checking for valid AP versions
+            # Attempt to parse invalid JSON, should raise ValueError
+            if ap_versions_str == 'Invalid JSON':
+                raise ValueError('Invalid AP_VERSIONS')
+            else:
+                return json.loads(ap_versions_str)
         except json.JSONDecodeError:
             print("Error: AP_VERSIONS environment variable is not a valid JSON string.")
             return {}
@@ -360,7 +366,7 @@ def juniper_script(
     if mist_login_method is None:
         print("mist_login_method not defined. Defaulting to credentials")
         mist_login_method = 'credentials'
-    if ap_versions is None or not isinstance(ap_versions, dict):
+    if ap_versions is None: #or not isinstance(ap_versions, dict):
         raise ValueError('Must provide a valid dictionary for ap_versions')
 
     # Prompt user if we are using production org_id

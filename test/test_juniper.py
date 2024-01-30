@@ -236,14 +236,15 @@ class TestJuniperScript(unittest.TestCase):
         mock_get_ap_versions.return_value = valid_ap_versions
 
         # Test if juniper_script or Admin class handles valid AP_VERSIONS correctly
-        admin = Admin()
-        self.assertEqual(admin.get_ap_versions(), valid_ap_versions)
+        self.assertEqual(Admin.get_ap_versions(), valid_ap_versions)
 
+    @patch.dict('os.environ', {'AP_VERSIONS': 'Invalid JSON'})
+    def test_invalid_ap_versions_handling(self):
         # Test with invalid AP_VERSIONS
-        with patch.dict('os.environ', {'AP_VERSIONS': 'invalid_json'}, clear=True):
-            with self.assertRaises(ValueError):
-                # Attempt to parse invalid JSON, should raise ValueError
-                admin.get_ap_versions()
+        with self.assertRaises(ValueError) as cm:
+        # Attempt to parse invalid JSON, should raise ValueError
+            Admin.get_ap_versions()
+        self.assertEqual(str(cm.exception),'Invalid AP_VERSIONS')
 
 
 class TestCheckIfNeedToAppend(unittest.TestCase):
