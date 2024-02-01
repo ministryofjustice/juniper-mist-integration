@@ -242,7 +242,7 @@ class TestJuniperScript(unittest.TestCase):
     def test_invalid_ap_versions_handling(self):
         # Test with invalid AP_VERSIONS
         with self.assertRaises(ValueError) as cm:
-        # Attempt to parse invalid JSON, should raise ValueError
+        git add
             Admin.get_ap_versions()
         self.assertEqual(str(cm.exception),'Invalid AP_VERSIONS')
 
