@@ -366,7 +366,7 @@ def juniper_script(
     if mist_login_method is None:
         print("mist_login_method not defined. Defaulting to credentials")
         mist_login_method = 'credentials'
-    if ap_versions is None: #or not isinstance(ap_versions, dict):
+    if ap_versions is None:  # or not isinstance(ap_versions, dict):
         raise ValueError('Must provide a valid dictionary for ap_versions')
 
     # Prompt user if we are using production org_id

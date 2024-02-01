@@ -243,8 +243,8 @@ class TestJuniperScript(unittest.TestCase):
         # Test with invalid AP_VERSIONS
         with self.assertRaises(ValueError) as cm:
         git add
-            Admin.get_ap_versions()
-        self.assertEqual(str(cm.exception),'Invalid AP_VERSIONS')
+        Admin.get_ap_versions()
+        self.assertEqual(str(cm.exception), 'Invalid AP_VERSIONS')
 
 
 class TestCheckIfNeedToAppend(unittest.TestCase):
