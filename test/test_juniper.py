@@ -229,6 +229,22 @@ class TestJuniperScript(unittest.TestCase):
         # Assert that the method returns the expected result
         self.assertIsNotNone(result)
 
+    @patch('src.juniper.Admin.get_ap_versions')
+    def test_ap_versions_handling(self, mock_get_ap_versions):
+        # Set up a valid AP_VERSIONS environment variable
+        valid_ap_versions = {"AP45": "0.12.27139", "AP32": "0.12.27139"}
+        mock_get_ap_versions.return_value = valid_ap_versions
+
+        # Test if juniper_script or Admin class handles valid AP_VERSIONS correctly
+        self.assertEqual(Admin.get_ap_versions(), valid_ap_versions)
+
+    @patch.dict('os.environ', {'AP_VERSIONS': 'Invalid JSON'})
+    def test_invalid_ap_versions_handling(self):
+        # Test with invalid AP_VERSIONS
+        with self.assertRaises(ValueError) as cm:
+            Admin.get_ap_versions()
+        self.assertEqual(str(cm.exception), 'Invalid AP_VERSIONS')
+
 
 class TestCheckIfNeedToAppend(unittest.TestCase):
 

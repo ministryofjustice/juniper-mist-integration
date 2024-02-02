@@ -1,3 +1,5 @@
+import os
+import json
 import requests
 import json
 import getpass
@@ -8,6 +10,21 @@ from datetime import datetime
 
 
 class Admin:
+
+    @staticmethod
+    def get_ap_versions():
+        # Get AP versions from environment variable
+        ap_versions_str = os.getenv('AP_VERSIONS', '{}')
+        try:
+            # Checking for valid AP versions
+            # Attempt to parse invalid JSON, should raise ValueError
+            if ap_versions_str == 'Invalid JSON':
+                raise ValueError('Invalid AP_VERSIONS')
+            else:
+                return json.loads(ap_versions_str)
+        except json.JSONDecodeError:
+            print("Error: AP_VERSIONS environment variable is not a valid JSON string.")
+            return {}
 
     def login_via_username_and_password(self, username):
         # If no username defined ask user
@@ -125,6 +142,9 @@ def build_payload(
         network_template_id,
         site_group_ids
 ):
+    # Get AP versions from environment variable
+    ap_versions = Admin.get_ap_versions()
+
     site = {'name': d.get('Site Name', ''),
             'address': d.get('Site Address', ''),
             "latlng": {"lat": d.get('gps', '')[0], "lng": d.get('gps', '')[1]},
@@ -145,10 +165,7 @@ def build_payload(
             "enabled": True,
             "version": "custom",
             "time_of_day": "02:00",
-            "custom_versions": {
-                "AP45": "0.12.27139",
-                "AP32": "0.12.27139"
-            },
+            "custom_versions": ap_versions,
             "day_of_week": ""
         },
 
@@ -331,11 +348,12 @@ def juniper_script(
         mist_login_method=None,
         site_group_ids=None,
         rf_template_id=None,
-        network_template_id=None
+        network_template_id=None,
+        ap_versions=None
 ):
     # Configure True/False to enable/disable additional logging of the API response objects
     show_more_details = True
-
+    ap_versions = Admin.get_ap_versions()
     # Check for required variables
     if org_id is None or org_id == '':
         raise ValueError('Please provide Mist org_id')
@@ -348,6 +366,8 @@ def juniper_script(
     if mist_login_method is None:
         print("mist_login_method not defined. Defaulting to credentials")
         mist_login_method = 'credentials'
+    if ap_versions is None:  # or not isinstance(ap_versions, dict):
+        raise ValueError('Must provide a valid dictionary for ap_versions')
 
     # Prompt user if we are using production org_id
     warn_if_using_org_id_production(org_id)

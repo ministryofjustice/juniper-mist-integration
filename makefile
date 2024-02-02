@@ -82,6 +82,7 @@ tests: ## Run unit tests for the python app
 	docker run -v $(shell pwd)/src:/app/src \
 		-v $(shell pwd)/test:/app/test \
 		-v $(shell pwd)/data_src:/data_src \
+		--env-file .env \
 		-e RUN_UNIT_TESTS=True $(NAME)
 
 .PHONY: shell
