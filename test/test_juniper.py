@@ -38,7 +38,8 @@ class TestJuniperScript(unittest.TestCase):
         )
 
         # Assertions
-        mock_plan_of_action.assert_called_once_with([{'Site Name': 'TestSite', 'Site Address': '123 Main St', 'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC', 'Enable GovWifi': 'true', 'Enable MoJWifi': 'false', 'Wired NACS Radius Key': 'key1', 'GovWifi Radius Key': 'key2'}], '8542a5fa-51e4-41be-83b9-acb416362cc0', '46b87163-abd2-4b08-a67f-1ccecfcfd061', '{"moj_wifi": "foo","gov_wifi": "bar"}')
+        mock_plan_of_action.assert_called_once_with([{'Site Name': 'TestSite', 'Site Address': '123 Main St', 'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC', 'Enable GovWifi': 'true', 'Enable MoJWifi': 'false',
+                                                    'Wired NACS Radius Key': 'key1', 'GovWifi Radius Key': 'key2'}], '8542a5fa-51e4-41be-83b9-acb416362cc0', '46b87163-abd2-4b08-a67f-1ccecfcfd061', '{"moj_wifi": "foo","gov_wifi": "bar"}')
         mock_post.assert_called_once_with('/api/v1/orgs/your_org_id/sites',
                                           {'name': 'TestSite', 'address': '123 Main St',
                                            'latlng': {'lat': 1.23, 'lng': 4.56}, 'country_code': 'US',
@@ -74,7 +75,8 @@ class TestJuniperScript(unittest.TestCase):
         )
 
         # Assertions
-        mock_plan_of_action.assert_called_once_with([{'Site Name': 'TestSite', 'Site Address': '123 Main St', 'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC', 'Enable GovWifi': 'true', 'Enable MoJWifi': 'false'}], '8542a5fa-51e4-41be-83b9-acb416362cc0', '46b87163-abd2-4b08-a67f-1ccecfcfd061', '{"moj_wifi": "foo","gov_wifi": "bar"}')
+        mock_plan_of_action.assert_called_once_with([{'Site Name': 'TestSite', 'Site Address': '123 Main St', 'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC',
+                                                    'Enable GovWifi': 'true', 'Enable MoJWifi': 'false'}], '8542a5fa-51e4-41be-83b9-acb416362cc0', '46b87163-abd2-4b08-a67f-1ccecfcfd061', '{"moj_wifi": "foo","gov_wifi": "bar"}')
         mock_post.assert_called_once_with('/api/v1/orgs/your_org_id/sites',
                                           {'name': 'TestSite', 'address': '123 Main St',
                                            'latlng': {'lat': 1.23, 'lng': 4.56}, 'country_code': 'US',

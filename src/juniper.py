@@ -295,7 +295,8 @@ def build_payload(
     }
 
     if 'GovWifi Radius Key' in d:
-        site_setting["vars"]["site_specific_radius_govwifi_secret"] = d.get('GovWifi Radius Key')
+        site_setting["vars"]["site_specific_radius_govwifi_secret"] = d.get(
+            'GovWifi Radius Key')
 
     return site, site_setting
 
@@ -366,6 +367,8 @@ def validate_user_defined_config_variables(
         raise ValueError('Must provide a valid dictionary for ap_versions')
 
 # Main function
+
+
 def juniper_script(
         data,
         org_id=None,
