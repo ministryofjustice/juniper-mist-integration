@@ -223,8 +223,8 @@ def build_payload(
         "wifi": {
             "enabled": True,
             "locate_unconnected": True,
-            "mesh_enabled": True,
-            "mesh_allow_dfs": True
+            "mesh_enabled": False,
+            "mesh_allow_dfs": False
         },
 
         "switch_mgmt": {
@@ -289,12 +289,14 @@ def build_payload(
 
         "vars": {
             "site_specific_radius_wired_nacs_secret": d.get('Wired NACS Radius Key', ''),
-            "site_specific_radius_govwifi_secret": d.get('GovWifi Radius Key', ''),
             "address": d.get('Site Address', ''),
             "site_name": d.get('Site Name', '')
         }
-
     }
+
+    if 'GovWifi Radius Key' in d:
+        site_setting["vars"]["site_specific_radius_govwifi_secret"] = d.get('GovWifi Radius Key')
+
     return site, site_setting
 
 
@@ -340,20 +342,14 @@ def plan_of_action(
         raise ValueError('Invalid input')
 
 
-# Main function
-def juniper_script(
-        data,
-        org_id=None,
-        mist_username=None,
-        mist_login_method=None,
-        site_group_ids=None,
-        rf_template_id=None,
-        network_template_id=None,
-        ap_versions=None
+def validate_user_defined_config_variables(
+        org_id,
+        site_group_ids,
+        rf_template_id,
+        network_template_id,
+        mist_login_method,
+        ap_versions
 ):
-    # Configure True/False to enable/disable additional logging of the API response objects
-    show_more_details = True
-    ap_versions = Admin.get_ap_versions()
     # Check for required variables
     if org_id is None or org_id == '':
         raise ValueError('Please provide Mist org_id')
@@ -368,6 +364,30 @@ def juniper_script(
         mist_login_method = 'credentials'
     if ap_versions is None:  # or not isinstance(ap_versions, dict):
         raise ValueError('Must provide a valid dictionary for ap_versions')
+
+# Main function
+def juniper_script(
+        data,
+        org_id=None,
+        mist_username=None,
+        mist_login_method=None,
+        site_group_ids=None,
+        rf_template_id=None,
+        network_template_id=None,
+        ap_versions=None
+):
+    # Configure True/False to enable/disable additional logging of the API response objects
+    show_more_details = True
+    ap_versions = Admin.get_ap_versions()
+
+    validate_user_defined_config_variables(
+        org_id,
+        site_group_ids,
+        rf_template_id,
+        network_template_id,
+        mist_login_method,
+        ap_versions
+    )
 
     # Prompt user if we are using production org_id
     warn_if_using_org_id_production(org_id)
