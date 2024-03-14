@@ -123,17 +123,21 @@ def check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(gov_wifi, moj_wi
 
 
 def warn_if_using_org_id_production(org_id):
-    production_org_id = '3e824dd6-6b37-4cc7-90bb-97d744e91175'
-    if org_id == production_org_id:
-        production_warning_answer = input(
-            "Warning you are using production ORG_ID, would you like to proceed? Y/N: ").upper()
-        if production_warning_answer == "Y":
-            print("Continuing with run")
-            return 'Continuing_with_run'
-        elif production_warning_answer == "N":
-            sys.exit()
-        else:
-            raise ValueError('Invalid input')
+    production_org_ids = [
+        '3e824dd6-6b37-4cc7-90bb-97d744e91175',
+        '9fd50080-520d-49ec-96a0-09f263fc8a05'
+                          ]
+    for production_org_id in production_org_ids:
+        if org_id == production_org_id:
+            production_warning_answer = input(
+                "Warning you are using production ORG_ID, would you like to proceed? Y/N: ").upper()
+            if production_warning_answer == "Y":
+                print("Continuing with run")
+                return 'Continuing_with_run'
+            elif production_warning_answer == "N":
+                sys.exit()
+            else:
+                raise ValueError('Invalid input')
 
 
 def build_payload(
@@ -178,7 +182,6 @@ def build_payload(
                 ""
             ],
             "whitelisted_ssids": [
-                "GovWifi"
             ]
         },
 
@@ -288,7 +291,6 @@ def build_payload(
         "ssr": {},
 
         "vars": {
-            "site_specific_radius_wired_nacs_secret": d.get('Wired NACS Radius Key', ''),
             "address": d.get('Site Address', ''),
             "site_name": d.get('Site Name', '')
         }
@@ -297,6 +299,12 @@ def build_payload(
     if 'GovWifi Radius Key' in d:
         site_setting["vars"]["site_specific_radius_govwifi_secret"] = d.get(
             'GovWifi Radius Key')
+        site_setting["rogue"]["whitelisted_ssids"] = [
+            "GovWifi"
+        ]
+    if 'Wired NACS Radius Key' in d:
+        site_setting["vars"]["site_specific_radius_wired_nacs_secret"] = d.get(
+            'Wired NACS Radius Key')
 
     return site, site_setting
 
