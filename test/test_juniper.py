@@ -6,6 +6,7 @@ from io import StringIO
 from datetime import datetime
 import os
 import pytest
+from parameterized import parameterized
 
 class TestJuniperScript(unittest.TestCase):
 
@@ -105,19 +106,17 @@ class TestJuniperScript(unittest.TestCase):
 
         self.assertEqual(str(cm.exception), 'Must define rf_template_id')
 
-
-    @pytest.mark.parametrize("fixt", ["a", "b"], indirect=True)
-    def test_indirect(self, fixt):
-        assert len(fixt) == 3
-
-    @pytest.mark.parametrize("production_org_id", ['3e824dd6-6b37-4cc7-90bb-97d744e91175','9fd50080-520d-49ec-96a0-09f263fc8a05'])
-    #@patch('builtins.input', return_value='y')
-    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_y_then_continue_to_run(self,
-                                                                                                         production_org_id
+    @parameterized.expand(
+        "production_org_id", ["3e824dd6-6b37-4cc7-90bb-97d744e91175",
+         "9fd50080-520d-49ec-96a0-09f263fc8a05"
+    ])
+    @patch('builtins.input', return_value='y')
+    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_y_then_continue_to_run(self, user_input,
+                                                                                                         production_org_id,
                                                                                                          ):
         print(production_org_id)
         result = warn_if_using_org_id_production(production_org_id)
-        self.assertEqual(result, 'Continuing_with_run')
+        self.assertEqual('Continuing_with_run', result)
 
     @patch('builtins.input', return_value='n')
     def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_n_then_sys_exit(self, user_input):
