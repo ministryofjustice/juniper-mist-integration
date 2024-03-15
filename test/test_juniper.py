@@ -107,27 +107,36 @@ class TestJuniperScript(unittest.TestCase):
         self.assertEqual(str(cm.exception), 'Must define rf_template_id')
 
     @parameterized.expand(
-        "production_org_id", ["3e824dd6-6b37-4cc7-90bb-97d744e91175",
+        ["3e824dd6-6b37-4cc7-90bb-97d744e91175",
          "9fd50080-520d-49ec-96a0-09f263fc8a05"
     ])
     @patch('builtins.input', return_value='y')
-    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_y_then_continue_to_run(self, user_input,
+    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_y_then_continue_to_run(self,
                                                                                                          production_org_id,
+                                                                                                         user_input
                                                                                                          ):
-        print(production_org_id)
         result = warn_if_using_org_id_production(production_org_id)
         self.assertEqual('Continuing_with_run', result)
 
+    @parameterized.expand(
+        ["3e824dd6-6b37-4cc7-90bb-97d744e91175",
+         "9fd50080-520d-49ec-96a0-09f263fc8a05"
+         ])
     @patch('builtins.input', return_value='n')
-    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_n_then_sys_exit(self, user_input):
-        production_org_id = '3e824dd6-6b37-4cc7-90bb-97d744e91175'
+    def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_n_then_sys_exit(self,
+                                                                                                  production_org_id,
+                                                                                                  user_input):
         with self.assertRaises(SystemExit):
             warn_if_using_org_id_production(production_org_id)
 
+    @parameterized.expand(
+        ["3e824dd6-6b37-4cc7-90bb-97d744e91175",
+         "9fd50080-520d-49ec-96a0-09f263fc8a05"
+         ])
     @patch('builtins.input', return_value='invalid')
     def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_invalid_then_raise_error(self,
+                                                                                                           production_org_id,
                                                                                                            user_input):
-        production_org_id = '3e824dd6-6b37-4cc7-90bb-97d744e91175'
         with self.assertRaises(ValueError) as cm:
             warn_if_using_org_id_production(production_org_id)
 
