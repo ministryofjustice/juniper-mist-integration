@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from src.juniper import juniper_script, Admin, check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups, \
-    warn_if_using_org_id_production, plan_of_action
+    warn_if_using_org_id_production, plan_of_action, build_payload
 from io import StringIO
 from datetime import datetime
 import os
@@ -338,6 +338,35 @@ class TestCheckIfNeedToAppend(unittest.TestCase):
         result = check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
             gov_wifi, moj_wifi, self.site_group_ids)
         self.assertEqual(result, [])
+
+
+class TestBuildPayLoadFunction(unittest.TestCase):
+    def setUp(self):
+        self.data = {'Site Name': 'TestSite', 'Site Address': '123 Main St',
+                     'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC',
+                     'Enable GovWifi': 'true', 'Enable MoJWifi': 'false',
+                     'Wired NACS Radius Key': 'key1', 'GovWifi Radius Key': 'key2'}
+        self.rf_template_id = "rf_template_id",
+        self.network_template_id = "network_template_id",
+        self.site_group_ids = '{"moj_wifi": "foo","gov_wifi": "bar"}'
+
+    def test_something(self):
+        result = build_payload(self.data,
+                      self.rf_template_id,
+                      self.network_template_id,
+                      self.site_group_ids)
+
+
+        self.assertEqual(result[0], {'address': '123 Main St',
+                                       'country_code': 'US',
+                                       'latlng': {'lat': 1.23,'lng': 4.56},
+                                       'name': 'TestSite',
+                                       'networktemplate_id': ('network_template_id',),
+                                       'rftemplate_id': ('rf_template_id',),
+                                       'sitegroup_ids': [],
+                                       'timezone': 'UTC'})
+        print("h")
+
 
 
 class TestPlanOfActionFunction(unittest.TestCase):

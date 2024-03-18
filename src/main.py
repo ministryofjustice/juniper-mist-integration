@@ -62,5 +62,6 @@ if __name__ == '__main__':
         org_id=os.environ.get('ORG_ID'),
         rf_template_id=os.environ.get('RF_TEMPLATE_ID'),
         data=json_data_with_geocoding,
-        network_template_id=os.environ.get('NETWORK_TEMPLATE_ID')
+        network_template_id=os.environ.get('NETWORK_TEMPLATE_ID'),
+        ap_versions=os.environ.get('AP_VERSIONS')
     )
