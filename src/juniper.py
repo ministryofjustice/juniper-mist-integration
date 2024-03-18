@@ -116,25 +116,14 @@ def warn_if_using_org_id_production(org_id):
 
 
 def plan_of_action(
-        data,
-        rf_template_id,
-        network_template_id,
-        site_group_ids,
-        ap_versions
+        payload_processor
 ):
 
     # Generate a timestamp for the filename
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     plan_file_name = "../data_src/mist_plan_{time}.json".format(time=timestamp)
 
-    payload_proccesor = BuildPayload(data,
-                     rf_template_id,
-                     network_template_id,
-                     site_group_ids,
-                     ap_versions
-                     )
-
-    processed_payload = payload_proccesor.get_site_payload()
+    processed_payload = payload_processor.get_site_payload()
 
     # Load file
     with open(plan_file_name, "w") as plan_file:
@@ -207,12 +196,15 @@ def juniper_script(
     # Prompt user if we are using production org_id
     warn_if_using_org_id_production(org_id)
 
+    payload_processor = BuildPayload(data,
+                                     rf_template_id,
+                                     network_template_id,
+                                     site_group_ids,
+                                     ap_versions
+                                     )
+
     plan_of_action(
-        data,
-        rf_template_id,
-        network_template_id,
-        site_group_ids,
-        ap_versions
+        payload_processor
     )
 
     # Establish Mist session
@@ -223,28 +215,23 @@ def juniper_script(
 
 
     # Create each site from the CSV file
-    for d in data:
+    for site_with_site_setting in payload_processor.get_site_payload():
         # Variables
         site_id = None
+        # print(site_with_site_setting)
 
-        site, site_setting = build_payload(
-            d,
-            rf_template_id,
-            network_template_id,
-            site_group_ids
-        )
 
         print('Calling the Mist Create Site API...')
-        result = admin.post('/api/v1/orgs/' + org_id + '/sites', site)
+        result = admin.post('/api/v1/orgs/' + org_id + '/sites', site_with_site_setting["site"])
         if result == False:
-            print('Failed to create site {}'.format(site['name']))
+            print('Failed to create site {}'.format(site_with_site_setting["site"]['name']))
             print('Skipping remaining operations for this site...')
             print('\n\n==========\n\n')
 
             continue
         else:
             site_id = result['id']
-            print('Created site {} ({})'.format(site['name'], site_id))
+            print('Created site {} ({})'.format(site_with_site_setting["site"]['name'], site_id))
 
             if show_more_details:
                 print('\nRetrieving the JSON response object...')
@@ -254,12 +241,12 @@ def juniper_script(
         # Update Site Setting
         print('Calling the Mist Update Setting API...')
         result = admin.put('/api/v1/sites/' + site_id + '/setting',
-                           site_setting)
+                           site_with_site_setting["site_setting"])
         if result == False:
             print('Failed to update site setting {} ({})'.format(
-                site['name'], site_id))
+                site_with_site_setting["site"]['name'], site_id))
         else:
-            print('Updated site setting {} ({})'.format(site['name'], site_id))
+            print('Updated site setting {} ({})'.format(site_with_site_setting["site"]['name'], site_id))
 
             if show_more_details:
                 print('\nRetrieving the JSON response object...')

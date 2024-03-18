@@ -194,6 +194,7 @@ class BuildPayload:
                 site_setting["vars"]["site_specific_radius_wired_nacs_secret"] = d.get(
                     'Wired NACS Radius Key')
 
-            json_objects.append(site)
-            json_objects.append(site_setting)
+            site_dict = {"site":site, "site_setting":site_setting}
+            json_objects.append(site_dict)
+
         return json_objects
