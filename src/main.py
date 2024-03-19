@@ -1,5 +1,3 @@
-import sys
-
 from juniper import juniper_script
 import os
 import csv
