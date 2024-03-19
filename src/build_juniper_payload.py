@@ -1,5 +1,6 @@
 import json
 
+
 class BuildPayload:
     def __init__(self,
                  data: list,
@@ -18,6 +19,26 @@ class BuildPayload:
     def get_site_payload(self):
         return self._site_payload
 
+    def _validate_data(self, data):
+        required_keys = [
+            'Site Name',
+            'Site Address',
+            'gps',
+            'country_code',
+            'time_zone',
+            'Enable GovWifi',
+            'Enable MoJWifi'
+        ]
+        missing_keys = []
+        for d in data:
+            for required_key in required_keys:
+                if required_key in d:
+                    pass
+                else:
+                    missing_keys.append(required_key)
+        if missing_keys != []:
+            raise ValueError("Missing the following keys {missing_keys}".format(missing_keys=missing_keys))
+
 
     def _check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(self, gov_wifi, moj_wifi, site_group_ids: dict):
         result = []
@@ -35,6 +56,7 @@ class BuildPayload:
             site_group_ids: dict,
             ap_versions: dict
     ):
+        self._validate_data(data)
         json_objects = []
         for d in data:
             site = {'name': d.get('Site Name', ''),
@@ -194,7 +216,7 @@ class BuildPayload:
                 site_setting["vars"]["site_specific_radius_wired_nacs_secret"] = d.get(
                     'Wired NACS Radius Key')
 
-            site_dict = {"site":site, "site_setting":site_setting}
+            site_dict = {"site": site, "site_setting": site_setting}
             json_objects.append(site_dict)
 
         return json_objects
