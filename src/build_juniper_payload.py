@@ -2,7 +2,7 @@ import json
 
 class BuildPayload:
     def __init__(self,
-                 data: dict,
+                 data: list,
                  rf_template_id: str,
                  network_template_id: str,
                  site_group_ids: dict,
@@ -29,7 +29,7 @@ class BuildPayload:
 
     def _build_site_payload(
             self,
-            data: dict,
+            data: list,
             rf_template_id: str,
             network_template_id: str,
             site_group_ids: dict,
