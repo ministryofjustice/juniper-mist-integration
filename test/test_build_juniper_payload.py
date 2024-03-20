@@ -1,9 +1,10 @@
 from src.build_juniper_payload import BuildPayload
 import unittest
+from unittest.mock import patch
+import json
 
 
 class TestBuildPayLoad(unittest.TestCase):
-    maxDiff = None
 
     def setUp(self):
         self.sample_data = [
@@ -168,3 +169,85 @@ class TestBuildPayLoad(unittest.TestCase):
 
         self.assertEqual(str(cm.exception),
                          "Missing the following keys ['Site Name', 'Site Address', 'gps', 'country_code', 'time_zone', 'Enable GovWifi', 'Enable MoJWifi']")
+
+class TestCheckIfNeedToAppend(unittest.TestCase):
+
+    def setUp(self):
+        # Define sample site group IDs for testing
+        self.site_group_ids = {
+            'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+            'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'
+        }
+        self.sample_data = [
+            {
+                'Site Name': 'MOJ-0137-Probation-Gloucestershire-TwyverHouse',
+                'Site Address': 'Twyver House, Bruton Way, Gloucester, GL1 1PB',
+                'gps': [51.86467215, -2.2396225106929535],
+                'country_code': 'GB',
+                'time_zone': 'Europe/London',
+                'Enable GovWifi': 'True',
+                'Enable MoJWifi': 'True',
+                'GovWifi Radius Key': 'govwifi_secret',
+                'Wired NACS Radius Key': 'wired_nacs_secret'
+            },
+            {
+                'Site Name': 'Test location 2',
+                'Site Address': '102 Petty France, London SW1H 9AJ',
+                'gps': [51.499929300000005, -0.13477761285315926],
+                'country_code': 'GB',
+                'time_zone': 'Europe/London',
+                'Enable GovWifi': 'False',
+                'Enable MoJWifi': 'False'
+            },
+            {
+                'Site Name': 'Test location 3',
+                'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
+                'gps': [50.727350349999995, -3.4744726127760086],
+                'country_code': 'GB',
+                'time_zone': 'Europe/London',
+                'Enable GovWifi': 'False',
+                'Enable MoJWifi': 'True',
+                'Wired NACS Radius Key': 'wired_nacs_secret'
+            }
+        ]
+        self.rf_template_id = "rf_template_123"
+        self.network_template_id = "network_template_123"
+        self.site_group_ids = {"moj_wifi": "moj_wifi_id", "gov_wifi": "gov_wifi_id"}
+        self.ap_versions = {"ap_version_1": "1.0", "ap_version_2": "2.0"}
+        self.payload_processor = BuildPayload(
+            data=self.sample_data,
+            rf_template_id=self.rf_template_id,
+            network_template_id=self.network_template_id,
+            site_group_ids='{"moj_wifi": "moj_wifi_id", "gov_wifi": "gov_wifi_id"}',
+            ap_versions=self.ap_versions
+        )
+
+    def test_append_gov_wifi(self):
+        gov_wifi = 'TRUE'
+        moj_wifi = 'FALSE'
+        result = self.payload_processor._check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
+            gov_wifi, moj_wifi,self.site_group_ids)
+        self.assertEqual(result, [self.site_group_ids['gov_wifi']])
+
+    def test_append_moj_wifi(self):
+        gov_wifi = 'FALSE'
+        moj_wifi = 'TRUE'
+        result = self.payload_processor._check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
+            gov_wifi, moj_wifi, self.site_group_ids)
+        self.assertEqual(result, [self.site_group_ids['moj_wifi']])
+
+    def test_append_both_wifi(self):
+        gov_wifi = 'TRUE'
+        moj_wifi = 'TRUE'
+        result = self.payload_processor._check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
+            gov_wifi, moj_wifi, self.site_group_ids)
+        expected_result = [self.site_group_ids['moj_wifi'],
+                           self.site_group_ids['gov_wifi']]
+        self.assertEqual(result, expected_result)
+
+    def test_append_neither_wifi(self):
+        gov_wifi = 'FALSE'
+        moj_wifi = 'FALSE'
+        result = self.payload_processor._check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
+            gov_wifi, moj_wifi, self.site_group_ids)
+        self.assertEqual(result, [])
