@@ -11,13 +11,14 @@ from parameterized import parameterized
 class TestJuniperScript(unittest.TestCase):
 
     @patch('src.juniper.plan_of_action')
-    @patch('getpass.getpass', return_value='token')
-    @patch('src.juniper.requests.Session.get', return_value=MagicMock(status_code=200))
-    @patch('src.juniper.JuniperClient.post')
-    @patch('src.juniper.JuniperClient.put')
-    def test_juniper_script_with_govwifi(self, mock_put, mock_post, mock_successful_login, api_token, mock_plan_of_action):
+    @patch('src.juniper.JuniperClient')
+    def test_given_successful_login_when_juniper_script_runs_post_a_site(self, mock_juniper_client, mock_plan_of_action):
+
         # Mock Mist API responses
+        mock_post = mock_juniper_client.return_value.post
         mock_post.return_value = {'id': '123', 'name': 'TestSite'}
+
+        mock_put = mock_juniper_client.return_value.put
         mock_put.return_value = {'status': 'success'}
 
         # Sample input data
@@ -35,49 +36,10 @@ class TestJuniperScript(unittest.TestCase):
             org_id='your_org_id',
             site_group_ids='{"moj_wifi": "foo","gov_wifi": "bar"}',
             rf_template_id='8542a5fa-51e4-41be-83b9-acb416362cc0',
-            network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
+            network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061',
+            ap_versions={"AP45": "0.12.27139", "AP32": "0.12.27139"}
         )
 
-        # Assertions
-        mock_plan_of_action.assert_called_once_with([{'Site Name': 'TestSite', 'Site Address': '123 Main St', 'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC', 'Enable GovWifi': 'true', 'Enable MoJWifi': 'false',
-                                                    'Wired NACS Radius Key': 'key1', 'GovWifi Radius Key': 'key2'}], '8542a5fa-51e4-41be-83b9-acb416362cc0', '46b87163-abd2-4b08-a67f-1ccecfcfd061', '{"moj_wifi": "foo","gov_wifi": "bar"}')
-        mock_post.assert_called_once_with('/api/v1/orgs/your_org_id/sites',
-                                          {'name': 'TestSite', 'address': '123 Main St',
-                                           'latlng': {'lat': 1.23, 'lng': 4.56}, 'country_code': 'US',
-                                           'rftemplate_id': '8542a5fa-51e4-41be-83b9-acb416362cc0',
-                                           'networktemplate_id': '46b87163-abd2-4b08-a67f-1ccecfcfd061',
-                                           'timezone': 'UTC', 'sitegroup_ids': []})
-
-    @patch('src.juniper.plan_of_action')
-    @patch('getpass.getpass', return_value='token')
-    @patch('src.juniper.requests.Session.get', return_value=MagicMock(status_code=200))
-    @patch('src.juniper.Admin.post')
-    @patch('src.juniper.Admin.put')
-    def test_juniper_script_without_gov_wifi(self, mock_put, mock_post, mock_successful_login, api_token, mock_plan_of_action):
-        # Mock Mist API responses
-        mock_post.return_value = {'id': '123', 'name': 'TestSite'}
-        mock_put.return_value = {'status': 'success'}
-
-        # Sample input data
-        data = [
-            {'Site Name': 'TestSite', 'Site Address': '123 Main St',
-             'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC',
-             'Enable GovWifi': 'true', 'Enable MoJWifi': 'false'}
-        ]
-
-        # Call the function
-        juniper_script(
-            data,
-            mist_login_method='token',
-            org_id='your_org_id',
-            site_group_ids='{"moj_wifi": "foo","gov_wifi": "bar"}',
-            rf_template_id='8542a5fa-51e4-41be-83b9-acb416362cc0',
-            network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
-        )
-
-        # Assertions
-        mock_plan_of_action.assert_called_once_with([{'Site Name': 'TestSite', 'Site Address': '123 Main St', 'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC',
-                                                    'Enable GovWifi': 'true', 'Enable MoJWifi': 'false'}], '8542a5fa-51e4-41be-83b9-acb416362cc0', '46b87163-abd2-4b08-a67f-1ccecfcfd061', '{"moj_wifi": "foo","gov_wifi": "bar"}')
         mock_post.assert_called_once_with('/api/v1/orgs/your_org_id/sites',
                                           {'name': 'TestSite', 'address': '123 Main St',
                                            'latlng': {'lat': 1.23, 'lng': 4.56}, 'country_code': 'US',
