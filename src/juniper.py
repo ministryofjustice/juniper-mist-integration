@@ -118,9 +118,6 @@ def juniper_script(
     admin = JuniperClient(mist_username, mist_login_method)
 
 
-    #TODO get json objects from state here and loop them to upload to mist
-
-
     # Create each site from the CSV file
     for site_with_site_setting in payload_processor.get_site_payload():
         # Variables
