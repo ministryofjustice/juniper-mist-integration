@@ -37,8 +37,8 @@ class BuildPayload:
                 else:
                     missing_keys.append(required_key)
         if missing_keys != []:
-            raise ValueError("Missing the following keys {missing_keys}".format(missing_keys=missing_keys))
-
+            raise ValueError("Missing the following keys {missing_keys}".format(
+                missing_keys=missing_keys))
 
     def _check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(self, gov_wifi, moj_wifi, site_group_ids: dict):
         result = []
@@ -70,8 +70,8 @@ class BuildPayload:
                         gov_wifi=d.get('Enable GovWifi', ''),
                         moj_wifi=d.get('Enable MoJWifi', ''),
                         site_group_ids=json.loads(site_group_ids)
-                    ),
-                    }
+            ),
+            }
 
             site_setting = {
 

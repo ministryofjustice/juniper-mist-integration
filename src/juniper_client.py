@@ -2,6 +2,7 @@ import getpass
 import requests
 import json
 
+
 class JuniperClient:
 
     def login_via_username_and_password(self, username):

@@ -4,11 +4,12 @@ from datetime import datetime
 from build_juniper_payload import BuildPayload
 from juniper_client import JuniperClient
 
+
 def warn_if_using_org_id_production(org_id):
     production_org_ids = [
         '3e824dd6-6b37-4cc7-90bb-97d744e91175',
         '9fd50080-520d-49ec-96a0-09f263fc8a05'
-                          ]
+    ]
     for production_org_id in production_org_ids:
         if org_id == production_org_id:
             production_warning_answer = input(
@@ -117,25 +118,26 @@ def juniper_script(
     # Establish Mist session
     admin = JuniperClient(mist_username, mist_login_method)
 
-
     # Create each site from the CSV file
     for site_with_site_setting in payload_processor.get_site_payload():
         # Variables
         site_id = None
         # print(site_with_site_setting)
 
-
         print('Calling the Mist Create Site API...')
-        result = admin.post('/api/v1/orgs/' + org_id + '/sites', site_with_site_setting["site"])
+        result = admin.post('/api/v1/orgs/' + org_id +
+                            '/sites', site_with_site_setting["site"])
         if result == False:
-            print('Failed to create site {}'.format(site_with_site_setting["site"]['name']))
+            print('Failed to create site {}'.format(
+                site_with_site_setting["site"]['name']))
             print('Skipping remaining operations for this site...')
             print('\n\n==========\n\n')
 
             continue
         else:
             site_id = result['id']
-            print('Created site {} ({})'.format(site_with_site_setting["site"]['name'], site_id))
+            print('Created site {} ({})'.format(
+                site_with_site_setting["site"]['name'], site_id))
 
             if show_more_details:
                 print('\nRetrieving the JSON response object...')
@@ -150,7 +152,8 @@ def juniper_script(
             print('Failed to update site setting {} ({})'.format(
                 site_with_site_setting["site"]['name'], site_id))
         else:
-            print('Updated site setting {} ({})'.format(site_with_site_setting["site"]['name'], site_id))
+            print('Updated site setting {} ({})'.format(
+                site_with_site_setting["site"]['name'], site_id))
 
             if show_more_details:
                 print('\nRetrieving the JSON response object...')

@@ -88,11 +88,11 @@ class TestBuildPayLoad(unittest.TestCase):
                      'site_name': 'MOJ-0137-Probation-Gloucestershire-TwyverHouse',
                      'site_specific_radius_govwifi_secret': 'govwifi_secret',
                      'site_specific_radius_wired_nacs_secret': 'wired_nacs_secret'}}}, {
-                                'site': {'name': 'Test location 2', 'address': '102 Petty France, London SW1H 9AJ',
-                                         'latlng': {'lat': 51.499929300000005, 'lng': -0.13477761285315926},
-                                         'country_code': 'GB', 'rftemplate_id': 'rf_template_123',
-                                         'networktemplate_id': 'network_template_123', 'timezone': 'Europe/London',
-                                         'sitegroup_ids': []}, 'site_setting': {
+            'site': {'name': 'Test location 2', 'address': '102 Petty France, London SW1H 9AJ',
+                     'latlng': {'lat': 51.499929300000005, 'lng': -0.13477761285315926},
+                     'country_code': 'GB', 'rftemplate_id': 'rf_template_123',
+                     'networktemplate_id': 'network_template_123', 'timezone': 'Europe/London',
+                     'sitegroup_ids': []}, 'site_setting': {
                 'auto_upgrade': {'enabled': True, 'version': 'custom', 'time_of_day': '02:00',
                                  'custom_versions': {'ap_version_1': '1.0', 'ap_version_2': '2.0'}, 'day_of_week': ''},
                 'rogue': {'min_rssi': -80, 'min_duration': 20, 'enabled': True, 'honeypot_enabled': True,
@@ -117,15 +117,15 @@ class TestBuildPayLoad(unittest.TestCase):
                                           'rssi_zones_enabled': False},
                 'zone_occupancy_alert': {'enabled': False, 'threshold': 5, 'email_notifiers': []},
                 'gateway_mgmt': {'app_usage': False, 'security_log_source_interface': '',
-                                 'auto_signature_update': {'enable': True, 'time_of_day': '02:00', 'day_of_week': ''}},
+                                                     'auto_signature_update': {'enable': True, 'time_of_day': '02:00', 'day_of_week': ''}},
                 'tunterm_monitoring': [], 'tunterm_monitoring_disabled': True, 'ssr': {},
                 'vars': {'address': '102 Petty France, London SW1H 9AJ', 'site_name': 'Test location 2'}}}, {
-                                'site': {'name': 'Test location 3',
-                                         'address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
-                                         'latlng': {'lat': 50.727350349999995, 'lng': -3.4744726127760086},
-                                         'country_code': 'GB', 'rftemplate_id': 'rf_template_123',
-                                         'networktemplate_id': 'network_template_123', 'timezone': 'Europe/London',
-                                         'sitegroup_ids': []}, 'site_setting': {
+            'site': {'name': 'Test location 3',
+                     'address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
+                     'latlng': {'lat': 50.727350349999995, 'lng': -3.4744726127760086},
+                     'country_code': 'GB', 'rftemplate_id': 'rf_template_123',
+                     'networktemplate_id': 'network_template_123', 'timezone': 'Europe/London',
+                     'sitegroup_ids': []}, 'site_setting': {
                 'auto_upgrade': {'enabled': True, 'version': 'custom', 'time_of_day': '02:00',
                                  'custom_versions': {'ap_version_1': '1.0', 'ap_version_2': '2.0'}, 'day_of_week': ''},
                 'rogue': {'min_rssi': -80, 'min_duration': 20, 'enabled': True, 'honeypot_enabled': True,
@@ -150,10 +150,10 @@ class TestBuildPayLoad(unittest.TestCase):
                                           'rssi_zones_enabled': False},
                 'zone_occupancy_alert': {'enabled': False, 'threshold': 5, 'email_notifiers': []},
                 'gateway_mgmt': {'app_usage': False, 'security_log_source_interface': '',
-                                 'auto_signature_update': {'enable': True, 'time_of_day': '02:00', 'day_of_week': ''}},
+                                                     'auto_signature_update': {'enable': True, 'time_of_day': '02:00', 'day_of_week': ''}},
                 'tunterm_monitoring': [], 'tunterm_monitoring_disabled': True, 'ssr': {},
                 'vars': {'address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'site_name': 'Test location 3',
-                         'site_specific_radius_wired_nacs_secret': 'wired_nacs_secret'}}}]
+                                             'site_specific_radius_wired_nacs_secret': 'wired_nacs_secret'}}}]
 
         self.assertEqual(payload_processor, expected_results)
 
@@ -169,6 +169,7 @@ class TestBuildPayLoad(unittest.TestCase):
 
         self.assertEqual(str(cm.exception),
                          "Missing the following keys ['Site Name', 'Site Address', 'gps', 'country_code', 'time_zone', 'Enable GovWifi', 'Enable MoJWifi']")
+
 
 class TestCheckIfNeedToAppend(unittest.TestCase):
 
@@ -212,7 +213,8 @@ class TestCheckIfNeedToAppend(unittest.TestCase):
         ]
         self.rf_template_id = "rf_template_123"
         self.network_template_id = "network_template_123"
-        self.site_group_ids = {"moj_wifi": "moj_wifi_id", "gov_wifi": "gov_wifi_id"}
+        self.site_group_ids = {
+            "moj_wifi": "moj_wifi_id", "gov_wifi": "gov_wifi_id"}
         self.ap_versions = {"ap_version_1": "1.0", "ap_version_2": "2.0"}
         self.payload_processor = BuildPayload(
             data=self.sample_data,
@@ -226,7 +228,7 @@ class TestCheckIfNeedToAppend(unittest.TestCase):
         gov_wifi = 'TRUE'
         moj_wifi = 'FALSE'
         result = self.payload_processor._check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
-            gov_wifi, moj_wifi,self.site_group_ids)
+            gov_wifi, moj_wifi, self.site_group_ids)
         self.assertEqual(result, [self.site_group_ids['gov_wifi']])
 
     def test_append_moj_wifi(self):

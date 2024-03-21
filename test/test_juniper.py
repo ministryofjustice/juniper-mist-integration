@@ -8,6 +8,7 @@ import os
 import pytest
 from parameterized import parameterized
 
+
 class TestJuniperScript(unittest.TestCase):
 
     @patch('src.juniper.plan_of_action')
@@ -71,7 +72,7 @@ class TestJuniperScript(unittest.TestCase):
     @parameterized.expand(
         ["3e824dd6-6b37-4cc7-90bb-97d744e91175",
          "9fd50080-520d-49ec-96a0-09f263fc8a05"
-    ])
+         ])
     @patch('builtins.input', return_value='y')
     def test_given_production_org_id_when_user_prompted_for_input_and_user_inputs_y_then_continue_to_run(self,
                                                                                                          production_org_id,
@@ -131,7 +132,8 @@ class TestJuniperScript(unittest.TestCase):
                            rf_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061',
                            network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061',
                            mist_login_method=None,
-                           ap_versions={"AP45": "0.12.27139", "AP32": "0.12.27139"}
+                           ap_versions={"AP45": "0.12.27139",
+                                        "AP32": "0.12.27139"}
                            )
             actual_output = mock_stdout.getvalue()
         expected_message = "mist_login_method not defined. Defaulting to credentials"
@@ -144,9 +146,6 @@ class TestJuniperScript(unittest.TestCase):
             juniper_script([], org_id=None)
 
         self.assertEqual(str(cm.exception), 'Please provide Mist org_id')
-
-
-
 
     # @patch('src.juniper.Admin.get_ap_versions')
     # def test_ap_versions_handling(self, mock_get_ap_versions):
@@ -164,6 +163,7 @@ class TestJuniperScript(unittest.TestCase):
     #         Admin.get_ap_versions()
     #     self.assertEqual(str(cm.exception), 'Invalid AP_VERSIONS')
 
+
 class TestPlanOfActionFunction(unittest.TestCase):
 
     @patch("src.juniper.BuildPayload")
@@ -171,7 +171,8 @@ class TestPlanOfActionFunction(unittest.TestCase):
 
         # Mocking the payload processor
         mock_processor_instance = mock_payload_processor.return_value
-        mock_processor_instance.get_site_payload.return_value = {"hello": "test"}
+        mock_processor_instance.get_site_payload.return_value = {
+            "hello": "test"}
 
         with patch('builtins.input', return_value='Y'), patch('sys.exit') as mock_exit:
             plan_of_action(mock_processor_instance)
@@ -186,7 +187,8 @@ class TestPlanOfActionFunction(unittest.TestCase):
 
         # Mocking the payload processor
         mock_processor_instance = mock_payload_processor.return_value
-        mock_processor_instance.get_site_payload.return_value = {"hello": "test"}
+        mock_processor_instance.get_site_payload.return_value = {
+            "hello": "test"}
 
         with patch('builtins.input', return_value='N'), self.assertRaises(SystemExit) as cm:
             plan_of_action(mock_processor_instance)
@@ -198,7 +200,8 @@ class TestPlanOfActionFunction(unittest.TestCase):
 
         # Mocking the payload processor
         mock_processor_instance = mock_payload_processor.return_value
-        mock_processor_instance.get_site_payload.return_value = {"hello": "test"}
+        mock_processor_instance.get_site_payload.return_value = {
+            "hello": "test"}
 
         # Mocking the built-in input
         with patch('builtins.input', return_value='invalid_input'):

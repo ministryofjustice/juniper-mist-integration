@@ -11,7 +11,7 @@ class TestJuniperClient(unittest.TestCase):
     @patch('src.juniper_client.requests.Session.post', return_value=MagicMock(status_code=200))
     def test_login_successfully_via_username_and_password(self, mock_post, input_mfa, input_password):
         admin = JuniperClient(username='test@example.com',
-                      mist_login_method='credentials')
+                              mist_login_method='credentials')
         self.assertIsNotNone(admin)
 
         mock_post.assert_called_with(
@@ -25,7 +25,7 @@ class TestJuniperClient(unittest.TestCase):
             self, mock_post, mfa_input, password_input):
         with self.assertRaises(ValueError) as context:
             admin = JuniperClient(username='test@example.com',
-                          mist_login_method='credentials')
+                                  mist_login_method='credentials')
 
         # Check the expected part of the exception message
         expected_error_message = "Login was not successful:"
@@ -63,7 +63,6 @@ class TestJuniperClient(unittest.TestCase):
                                     )
 
         self.assertEqual(mock_get.call_count, 1)
-
 
     @patch('getpass.getpass', return_value='token')
     @patch('src.juniper_client.requests.Session.get', return_value=MagicMock(status_code=200))
