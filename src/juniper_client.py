@@ -35,12 +35,12 @@ class JuniperClient:
         token = getpass.getpass(prompt='Input the MIST API TOKEN:')
         self.headers['Authorization'] = 'Token ' + token
         request_url = self.base_url + "/self/apitokens"
-        responce = self.session.get(request_url, headers=self.headers)
-        if responce.status_code == 200:
+        response = self.session.get(request_url, headers=self.headers)
+        if response.status_code == 200:
             print("Login successful")
         else:
             raise ValueError(
-                "Login was not successful via token: {response}".format(response=responce))
+                "Login was not successful via token: {response}".format(response=response))
 
     def __init__(self, username=None, mist_login_method=None):
         self.session = requests.Session()
