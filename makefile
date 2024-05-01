@@ -72,9 +72,11 @@ run-prod: ## Run the python script only mounting the host for csv-file. Format: 
 
 .PHONY: run-dev
 run-dev: ## Run the python script while mounting the host. This enables using the latest local src code without needing to wait for a container build. Format: MIST_API_TOKEN=foo ORG_ID=bar make run-dev
-	docker run -it -v $(shell pwd)/src:/app/src \
-				-v $(shell pwd)/data_src:/data_src \
+	docker run -it -v $(shell pwd)/backend/src:/app/src_backend \
+				-v $(shell pwd)/backend/data_src:/data_src \
+				-v $(shell pwd)/frontend:/app/src_frontend \
 				--env-file .env \
+				-p 5000:5000 \
 				$(NAME)
 
 .PHONY: tests

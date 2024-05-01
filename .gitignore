@@ -9,7 +9,7 @@ env/
 *.sha256
 terraform.tfstate
 
-data_src/**.csv
-data_src/**mist_plan**.json
+backend/data_src/**.csv
+backend/data_src/**mist_plan**.json
 .idea
 **/__pycache__/
