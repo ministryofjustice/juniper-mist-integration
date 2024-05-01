@@ -76,7 +76,7 @@ run-dev: ## Run the python script while mounting the host. This enables using th
 				-v $(shell pwd)/backend/data_src:/data_src \
 				-v $(shell pwd)/frontend:/app/src_frontend \
 				--env-file .env \
-				-p 5000:5000 \
+				-p 5001:5000 \
 				$(NAME)
 
 .PHONY: tests

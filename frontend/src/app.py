@@ -8,9 +8,13 @@ app = Flask(
 def index():
     return render_template('index.html')
 
-@app.route('/assets/images/govuk-crest-2x.png')
-def subpage():
-    return redirect('http://localhost:5000/static/gov-uk-frontend/assets/images/govuk-crest-2x.png', code=301)
+@app.route('/assets/images/<path:path>')
+def asset_images_govuk(path):
+    return redirect('/static/gov-uk-frontend/assets/images/' + path, code=301)
+
+@app.route('/assets/fonts/<path:path>')
+def asset_images(path):
+    return redirect('/static/gov-uk-frontend/assets/fonts/' + path, code=301)
 
 
 if __name__ == '__main__':
