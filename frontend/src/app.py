@@ -30,6 +30,10 @@ def assign_site():
 def interactive_shell():
     return render_template('interactive_shell.html')
 
+@app.route('/interactive_shell_lib.html')
+def interactive_shell_lib():
+    return render_template('interactive_shell_lib.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
