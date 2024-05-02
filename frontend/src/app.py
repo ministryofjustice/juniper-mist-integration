@@ -1,11 +1,16 @@
 from flask import Flask, render_template,redirect
-from csvutils import CsvUtils
+from upload import csv_blueprint
+from assets_redirect import redirects_blueprint
 
 app = Flask(
     __name__
     )
 
+app.config['APP_NAME'] = 'juniper_web_handler'
 app.config['SECRET_KEY'] = 'your_secret_key_here'
+app.register_blueprint(csv_blueprint, url_prefix='/upload')
+app.register_blueprint(redirects_blueprint, url_prefix='/assets')
+
 
 @app.route('/')
 def index():
@@ -15,22 +20,9 @@ def index():
 def add_site():
     return render_template('add_site.html')
 
-@app.route('/upload', methods=['POST'])
-def upload_csvv():
-    x = CsvUtils(app)
-    return x.upload_csv()
-
 @app.route('/assign-site')
 def assign_site():
     return render_template('assign_site.html')
-
-@app.route('/assets/images/<path:path>')
-def asset_images_govuk(path):
-    return redirect('/static/gov-uk-frontend/assets/images/' + path, code=301)
-
-@app.route('/assets/fonts/<path:path>')
-def asset_fonts(path):
-    return redirect('/static/gov-uk-frontend/assets/fonts/' + path, code=301)
 
 
 if __name__ == '__main__':

@@ -5,7 +5,7 @@ function uploadFile() {
     var formData = new FormData();
     formData.append('file', file);
 
-    fetch('/upload', {
+    fetch('/upload/csv', {
         method: 'POST',
         body: formData
     })
