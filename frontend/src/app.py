@@ -1,4 +1,3 @@
-import os
 from flask import Flask, render_template,redirect, jsonify
 from upload import csv_blueprint
 from assets_redirect import redirects_blueprint
@@ -26,6 +25,10 @@ def add_site():
 @app.route('/assign-site')
 def assign_site():
     return render_template('assign_site.html')
+
+@app.route('/interactive-shell')
+def interactive_shell():
+    return render_template('interactive_shell.html')
 
 
 if __name__ == '__main__':
