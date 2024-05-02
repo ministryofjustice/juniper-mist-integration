@@ -1,6 +1,8 @@
-from flask import Flask, render_template,redirect
+import os
+from flask import Flask, render_template,redirect, jsonify
 from upload import csv_blueprint
 from assets_redirect import redirects_blueprint
+from lookup import lookup_blueprint
 
 app = Flask(
     __name__
@@ -10,6 +12,7 @@ app.config['APP_NAME'] = 'juniper_web_handler'
 app.config['SECRET_KEY'] = 'your_secret_key_here'
 app.register_blueprint(csv_blueprint, url_prefix='/upload')
 app.register_blueprint(redirects_blueprint, url_prefix='/assets')
+app.register_blueprint(lookup_blueprint, url_prefix='/lookup')
 
 
 @app.route('/')

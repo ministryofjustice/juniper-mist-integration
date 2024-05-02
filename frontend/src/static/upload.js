@@ -11,6 +11,7 @@ function uploadFile() {
     })
     .then(response => {
         if (response.ok) {
+            window.location.reload();
             return response.text();
         }
         throw new Error('Network response was not ok.');

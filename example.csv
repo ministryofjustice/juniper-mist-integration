@@ -1,0 +1,4 @@
+Site Name,Site Address,Enable GovWifi,Enable MoJWifi, GovWifi Radius Key, Wired NACS Radius Key
+Test location 1,"40 Mayflower Dr, Plymouth PL2 3DG", TRUE, FALSE, 00000DD0000BC0EEE000, 00000DD0000BC0EEE000
+Test location 2,"102 Petty France, London SW1H 9AJ", FALSE, TRUE, 00000DD0000BC0EEE000, 00000DD0000BC0EEE000
+Test location 3,"Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB", FALSE, FALSE, 00000DD0000BC0EEE000, 00000DD0000BC0EEE000
