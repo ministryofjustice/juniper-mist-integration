@@ -34,11 +34,14 @@ def upload_csv():
     if file.filename == '':
         return redirect(request.url)
     
-    if file:
-        filename = os.path.join(app.config['UPLOAF_FOLDER'], file.filename)
+    if file and allowed_file(file.filename):
+        filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(filename)
         
         return 'File uploaded successfully'
+    else:
+        flash('Invalid file type')
+        return redirect(request.url)
         
     
 @app.route('/assign-site')
