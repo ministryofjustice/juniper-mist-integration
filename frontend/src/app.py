@@ -1,15 +1,10 @@
-import os
-from flask import Flask, render_template,redirect, url_for, request, flash, redirect
-from werkzeug.utils import secure_filename
-
-UPLOAD_FOLDER = '/data_src'
-ALLOWED_EXTENSIONS = {'csv'}
+from flask import Flask, render_template,redirect
+from csvutils import CsvUtils
 
 app = Flask(
     __name__
     )
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'your_secret_key_here'
 
 @app.route('/')
@@ -20,30 +15,11 @@ def index():
 def add_site():
     return render_template('add_site.html')
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-           
 @app.route('/upload', methods=['POST'])
-def upload_csv():
-    if 'file' not in request.files:
-        return redirect(request.url)
-    
-    file = request.files['file']
-    
-    if file.filename == '':
-        return redirect(request.url)
-    
-    if file and allowed_file(file.filename):
-        filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        file.save(filename)
-        
-        return 'File uploaded successfully'
-    else:
-        flash('Invalid file type')
-        return redirect(request.url)
-        
-    
+def upload_csvv():
+    x = CsvUtils(app)
+    return x.upload_csv()
+
 @app.route('/assign-site')
 def assign_site():
     return render_template('assign_site.html')
