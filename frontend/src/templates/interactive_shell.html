@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parent Page</title>
+    <script src="/static/interactive-shell/interactive_shell.js"></script>
 </head>
-<body onload="resizeIframe()">
+<body>
     <h1>Parent HTML Page</h1>
-    <iframe id="childIframe" src="/interactive_shell_lib.html" frameborder="0"></iframe>
-</body>
+    <iframe id="childIframe" src="/interactive_shell_lib.html" height="1500" width="1500" frameborder="0"></iframe>
+  </body>
 
-<script>"{{ url_for('static', filename='interactive-shell/interactive_shell.js') }}"</script>
 </html>
