@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 csv_blueprint = Blueprint('uploads',__name__)
 
 def _allowed_file(filename):
-    allowed_extentions = {'csv'}
+    allowed_extentions = {'csv','env'}
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in allowed_extentions
 

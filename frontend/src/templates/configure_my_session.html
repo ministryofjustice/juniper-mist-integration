@@ -60,11 +60,11 @@
   </header>
   <div class="govuk-width-container">
     <main class="govuk-main-wrapper" id="main-content">
-      <h1 class="govuk-heading-xl">Add new site</h1>
+      <h1 class="govuk-heading-xl">Configre my session</h1>
 <!-- File upload component - note this is just to select the required file-->
       <div class="govuk-form-group">
         <label class="govuk-label" for="file-upload-1">
-          Upload .csv file
+          Upload your .csv file and .env file
         </label>
         <input class="govuk-file-upload" id="file-upload-1" name="fileUpload1" type="file">
       </div>
@@ -77,7 +77,7 @@
 
         </script>
 <!-- File submit button end -->
-<!-- Select component -->
+<!-- Select component for csv -->
     <div class="govuk-form-group">
         <label class="govuk-label" for="sort">
         Select .csv to be processed
@@ -87,7 +87,18 @@
         </select>
         <script src="/static/csvselect.js"></script>
     </div>
-<!-- Select component ends-->
+<!-- Select component ends for csv -->
+
+<!-- Select component for profile -->
+<div class="govuk-form-group">
+  <label class="govuk-label" for="sort">
+  Select .env to use.
+  </label>
+  <select class="govuk-select" id="envSelect" name="sort">
+
+  </select>
+</div>
+<!-- Select component ends for csv -->
 <!-- Next button -->
     <a href="/interactive-shell" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button" />
 

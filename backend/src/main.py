@@ -2,6 +2,7 @@ from juniper import juniper_script
 import os
 import csv
 from geocode import geocode, find_timezone, find_country_code
+from dotenv import load_dotenv
 
 
 # Convert CSV file to JSON object.
@@ -44,6 +45,10 @@ def add_geocoding_to_json(data):
 
 
 if __name__ == '__main__':
+
+    load_dotenv()
+
+    print(csv_file_path)
 
     csv_file_path = os.getcwd() + '/../data_src/sites_with_clients.csv'
 

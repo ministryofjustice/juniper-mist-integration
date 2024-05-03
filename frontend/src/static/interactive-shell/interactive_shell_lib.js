@@ -22,27 +22,27 @@ $(function () {
       brightWhite: '#FFFFFF'
     };
     // vscode-snazzy https://github.com/Tyriar/vscode-snazzy
-    var otherTheme = {
-      foreground: '#eff0eb',
-      background: '#282a36',
-      selection: '#97979b33',
-      black: '#282a36',
-      brightBlack: '#686868',
-      red: '#ff5c57',
-      brightRed: '#ff5c57',
-      green: '#5af78e',
-      brightGreen: '#5af78e',
-      yellow: '#f3f99d',
-      brightYellow: '#f3f99d',
-      blue: '#57c7ff',
-      brightBlue: '#57c7ff',
-      magenta: '#ff6ac1',
-      brightMagenta: '#ff6ac1',
-      cyan: '#9aedfe',
-      brightCyan: '#9aedfe',
-      white: '#f1f1f0',
-      brightWhite: '#eff0eb'
-    };
+    // var otherTheme = {
+    //   foreground: '#eff0eb',
+    //   background: '#282a36',
+    //   selection: '#97979b33',
+    //   black: '#282a36',
+    //   brightBlack: '#686868',
+    //   red: '#ff5c57',
+    //   brightRed: '#ff5c57',
+    //   green: '#5af78e',
+    //   brightGreen: '#5af78e',
+    //   yellow: '#f3f99d',
+    //   brightYellow: '#f3f99d',
+    //   blue: '#57c7ff',
+    //   brightBlue: '#57c7ff',
+    //   magenta: '#ff6ac1',
+    //   brightMagenta: '#ff6ac1',
+    //   cyan: '#9aedfe',
+    //   brightCyan: '#9aedfe',
+    //   white: '#f1f1f0',
+    //   brightWhite: '#eff0eb'
+    // };
     var isBaseTheme = true;
 
     var term = new window.Terminal({
@@ -80,7 +80,7 @@ $(function () {
         term.write('\r\n$ ');
       };
 
-      term.writeln('Below is a simple emulated backend, try running `help`.');
+      term.writeln('Welcome to the Juniper Mist site configuration tool');
       addDecoration(term);
       prompt(term);
 
@@ -285,7 +285,7 @@ $(function () {
     const decoration = term.registerDecoration({ marker, x: 44 });
     decoration.onRender(element => {
       element.classList.add('link-hint-decoration');
-      
+
       // must be inlined to override inlined width/height coming from xterm
       element.style.height = '';
       element.style.width = '';

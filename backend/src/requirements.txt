@@ -3,3 +3,4 @@ geopy==2.4.1
 timezonefinder==6.2.0
 pytest==8.1.1
 parameterized==0.9.0
+load_dotenv==1.0.1
