@@ -23,7 +23,7 @@ def index():
 
 @app.route('/add-site')
 def add_site():
-    return render_template('add_site.html')
+    return render_template('configure_my_session.html')
 
 @app.route('/assign-site')
 def assign_site():
