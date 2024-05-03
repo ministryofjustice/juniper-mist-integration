@@ -12,6 +12,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='gov-uk-frontend/css/govuk-frontend-5.3.1.min.css') }}">
     <meta charset="UTF-8">
     <script src="/static/interactive-shell/interactive_shell.js"></script>
+    <style>
+        #childIframe {
+          width: 100%;
+        }
+    </style>
 </head>
 
 <body class="govuk-template__body">
@@ -63,7 +68,7 @@
     <main class="govuk-main-wrapper" id="main-content">
       <h1 class="govuk-heading-xl">Juniper Mist Site Configuration</h1>
       <a href="/add-site" class="govuk-back-link">Back</a>
-      <iframe id="childIframe" src="/interactive_shell_lib.html" height="1000" width="1000" frameborder="0"></iframe>
+      <iframe id="childIframe" src="/interactive_shell_lib.html" frameborder="0" height="750"></iframe>
     </main>
   </div>
   <footer class="govuk-footer">
