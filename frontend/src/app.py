@@ -1,9 +1,10 @@
-from flask import Flask, render_template,redirect, jsonify
+from flask import Flask, render_template,redirect, jsonify, request
 from flask_socketio import SocketIO, emit
 from upload import csv_blueprint
 from assets_redirect import redirects_blueprint
 from lookup import lookup_blueprint
 import subprocess
+import shutil
 
 app = Flask(
     __name__
@@ -35,6 +36,19 @@ def interactive_shell():
 
 @app.route('/interactive_shell_lib.html')
 def interactive_shell_lib():
+    return render_template('interactive_shell_lib.html')
+
+@app.route('/submit', methods=['POST'])
+def when_user_submits_setup_csv_and_env_for_session():
+    csv_file_name = request.form.get('csv_file')
+    env_file_name = request.form.get('env_file')
+
+    if not csv_file_name or not env_file_name:
+        return "CSV file name or environment file name missing", 400
+    # This will overwrite exsiting sessions if they already exist
+    shutil.copyfile('/data_src/' + csv_file_name, '/user_session/current_session.csv')
+    shutil.copyfile('/data_src/' + env_file_name, '/user_session/current_session.env')
+
     return render_template('interactive_shell_lib.html')
 
 @SocketIO.on('python_command')
