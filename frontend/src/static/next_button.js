@@ -1,6 +1,9 @@
-function sessionSelect(selected_env_file, selected_csv_file) {
+function sessionSelect() {
     // Create a FormData object
     var formData = new FormData();
+
+    var selected_env_file = document.getElementById("envSelect").value;
+    var selected_csv_file = 'example.sites_with_clients.csv';
 
     // Append the CSV file name
     formData.append('csv_file', selected_csv_file);
