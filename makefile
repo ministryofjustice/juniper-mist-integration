@@ -67,7 +67,6 @@ make setup-working-directory: ## Setups CSV directory
 .PHONY: run-prod
 run-prod: ## Run the python script only mounting the host for csv-file. Format: MIST_API_TOKEN=foo ORG_ID=bar make run-prod
 	docker run -it -v $(shell pwd)/data_src:/data_src \
-				--env-file .env \
 				$(NAME)
 
 .PHONY: run-dev
@@ -75,7 +74,6 @@ run-dev: ## Run the python script while mounting the host. This enables using th
 	docker run -it -v $(shell pwd)/backend/src:/app/src_backend \
 				-v $(shell pwd)/backend/data_src:/data_src \
 				-v $(shell pwd)/frontend:/app/src_frontend \
-				--env-file .env \
 				-p 5001:5000 \
 				$(NAME)
 

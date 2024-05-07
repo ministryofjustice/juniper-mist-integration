@@ -29,7 +29,7 @@ def plan_of_action(
 
     # Generate a timestamp for the filename
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    plan_file_name = "../data_src/mist_plan_{time}.json".format(time=timestamp)
+    plan_file_name = "/data_src/mist_plan_{time}.json".format(time=timestamp)
 
     processed_payload = payload_processor.get_site_payload()
 

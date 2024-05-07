@@ -52,24 +52,35 @@ def when_user_submits_setup_csv_and_env_for_session():
     return render_template('interactive_shell_lib.html')
 
 @SocketIO.on('python_command')
-def handle_python_command(command):
+def handle_python_command():
     # Execute the Python command and emit the output
-    output = execute_python_command(command)
+    output = execute_python_command()
     emit('output', output)
 
-def execute_python_command(command):
+def execute_python_command():
     try:
         # Execute the Python script using subprocess.Popen
-        process = subprocess.Popen(['python', '/app/src_backend/main.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
+        process = subprocess.Popen(['python', '/app/src_backend/main.py'],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   stdin=subprocess.PIPE,
+                                   universal_newlines=True)
 
-        # Check if there is any error
-        if stderr:
-            return f"Error executing script: {stderr.decode('utf-8')}"
-        else:
-            return f"Output: {stdout.decode('utf-8')}"
+        # Read output from the subprocess in real-time
+        output_lines = []
+        while True:
+            output_line = process.stdout.readline()
+            if not output_line:
+                break
+            output_lines.append(output_line.strip())
+            # Emit each output line to the front end
+            emit('output', output_line.strip())
+
+        process.wait()
+
+        return "Command executed successfully"
     except Exception as e:
-        return f"Error executing script: {e}"
+        return f"Error executing command: {e}"
 
 
 if __name__ == '__main__':

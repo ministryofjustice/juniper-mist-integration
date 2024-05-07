@@ -44,14 +44,22 @@ def add_geocoding_to_json(data):
     return data
 
 
+def load_dotenv_session(dotenv_location):
+    try:
+        load_dotenv(dotenv_location)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Error: Could not find the session file at '{dotenv_path}'."
+                                " Please make sure the session file exists and the path is correct.")
+    except Exception as e:
+        raise Exception(f"An unexpected error occurred: {e}."
+                        " Please check the session file and ensure it is formatted correctly.")
+
 if __name__ == '__main__':
 
-    load_dotenv()
+    dotenv_path_location = '/user_session/current_session.env'
+    load_dotenv_session(dotenv_path_location)
 
-    print(csv_file_path)
-
-    csv_file_path = os.getcwd() + '/../data_src/sites_with_clients.csv'
-
+    csv_file_path = '/user_session/current_session.csv'
     # Convert CSV to valid JSON
     json_data_without_geocoding = convert_csv_to_json(csv_file_path)
 

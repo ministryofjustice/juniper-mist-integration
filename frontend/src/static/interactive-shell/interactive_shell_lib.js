@@ -251,8 +251,8 @@ $(function () {
         description: 'Prints this help message',
       },
       python: {
-        f: (command) => {
-          socket.emit('python_command', command);
+        f: () => {
+          socket.emit('python_command');
         },
         description: 'Execute a Python command on the server',
       }
