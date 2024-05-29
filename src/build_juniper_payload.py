@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+import sys
 
 
 class BuildPayload:
@@ -220,3 +222,29 @@ class BuildPayload:
             json_objects.append(site_dict)
 
         return json_objects
+
+
+def plan_of_action(
+    processed_payload
+):
+    # Generate a timestamp for the filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    plan_file_name = "../data_src/mist_plan_{time}.json".format(time=timestamp)
+
+    # Load file
+    with open(plan_file_name, "w") as plan_file:
+        json.dump(processed_payload, plan_file, indent=2)
+
+    # Print to terminal
+    with open(plan_file_name, "r") as plan_file:
+        print(plan_file.read())
+
+    print("A file containing all the changes has been created: {file}".format(
+        file=plan_file_name))
+    user_input = input("Do you wish to continue? (y/n): ").upper()
+    if user_input == "Y":
+        print("Continuing with run")
+    elif user_input == "N":
+        sys.exit(0)
+    else:
+        raise ValueError('Invalid input')
