@@ -1,9 +1,29 @@
 import json
 import sys
-from datetime import datetime
-from build_juniper_payload import BuildPayload
+from build_juniper_payload import BuildPayload, plan_of_action
 from juniper_client import JuniperClient
+from geocode import geocode, find_timezone, find_country_code
+import time
 
+
+def add_geocoding_to_json(data):
+    for d in data:
+        # Variables
+        site_id = None
+        site = {'name': d.get('Site Name', ''),
+                'address': d.get('Site Name', '')
+                }
+
+        gps = geocode(d.get('Site Address', ''))
+        country_code = find_country_code(gps)
+        time_zone = find_timezone(gps)
+
+        # Adding new key-value pairs to the dictionary
+        d['gps'] = gps
+        d['country_code'] = country_code
+        d['time_zone'] = time_zone
+        time.sleep(1)
+    return data
 
 def warn_if_using_org_id_production(org_id):
     production_org_ids = [
@@ -21,36 +41,6 @@ def warn_if_using_org_id_production(org_id):
                 sys.exit()
             else:
                 raise ValueError('Invalid input')
-
-
-def plan_of_action(
-        payload_processor
-):
-
-    # Generate a timestamp for the filename
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    plan_file_name = "../data_src/mist_plan_{time}.json".format(time=timestamp)
-
-    processed_payload = payload_processor.get_site_payload()
-
-    # Load file
-    with open(plan_file_name, "w") as plan_file:
-        json.dump(processed_payload, plan_file, indent=2)
-
-    # Print to terminal
-    with open(plan_file_name, "r") as plan_file:
-        print(plan_file.read())
-
-    print("A file containing all the changes has been created: {file}".format(
-        file=plan_file_name))
-    user_input = input("Do you wish to continue? (y/n): ").upper()
-
-    if user_input == "Y":
-        print("Continuing with run")
-    elif user_input == "N":
-        sys.exit(0)
-    else:
-        raise ValueError('Invalid input')
 
 
 def validate_user_defined_config_variables(
@@ -79,8 +69,8 @@ def validate_user_defined_config_variables(
 # Main function
 
 
-def juniper_script(
-        data,
+def juniper_script_site_creation(
+        json_data_without_geocoding,
         org_id=None,
         mist_username=None,
         mist_login_method=None,
@@ -89,6 +79,10 @@ def juniper_script(
         network_template_id=None,
         ap_versions=None
 ):
+
+    data = add_geocoding_to_json(
+        json_data_without_geocoding)
+
     # Configure True/False to enable/disable additional logging of the API response objects
     show_more_details = True
 
@@ -112,7 +106,7 @@ def juniper_script(
                                      )
 
     plan_of_action(
-        payload_processor
+        payload_processor.get_site_payload()
     )
 
     # Establish Mist session

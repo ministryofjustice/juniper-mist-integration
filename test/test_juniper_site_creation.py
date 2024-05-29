@@ -1,18 +1,15 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.juniper import juniper_script, \
-    warn_if_using_org_id_production, plan_of_action
+from src.juniper_site_creation import juniper_script_site_creation, \
+    warn_if_using_org_id_production, add_geocoding_to_json
 from io import StringIO
-from datetime import datetime
-import os
 import pytest
 from parameterized import parameterized
 
-
 class TestJuniperScript(unittest.TestCase):
 
-    @patch('src.juniper.plan_of_action')
-    @patch('src.juniper.JuniperClient')
+    @patch('src.juniper_site_creation.plan_of_action')
+    @patch('src.juniper_site_creation.JuniperClient')
     def test_given_successful_login_when_juniper_script_runs_post_a_site(self, mock_juniper_client, mock_plan_of_action):
 
         # Mock Mist API responses
@@ -24,15 +21,14 @@ class TestJuniperScript(unittest.TestCase):
 
         # Sample input data
         data = [
-            {'Site Name': 'TestSite', 'Site Address': '123 Main St',
-             'gps': [1.23, 4.56], 'country_code': 'US', 'time_zone': 'UTC',
+            {'Site Name': 'TestSite', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
              'Enable GovWifi': 'true', 'Enable MoJWifi': 'false',
              'Wired NACS Radius Key': 'key1', 'GovWifi Radius Key': 'key2'}
         ]
 
         # Call the function
-        juniper_script(
-            data,
+        juniper_script_site_creation(
+            json_data_without_geocoding=data,
             mist_login_method='token',
             org_id='your_org_id',
             site_group_ids='{"moj_wifi": "foo","gov_wifi": "bar"}',
@@ -42,15 +38,16 @@ class TestJuniperScript(unittest.TestCase):
         )
 
         mock_post.assert_called_once_with('/api/v1/orgs/your_org_id/sites',
-                                          {'name': 'TestSite', 'address': '123 Main St',
-                                           'latlng': {'lat': 1.23, 'lng': 4.56}, 'country_code': 'US',
-                                           'rftemplate_id': '8542a5fa-51e4-41be-83b9-acb416362cc0',
-                                           'networktemplate_id': '46b87163-abd2-4b08-a67f-1ccecfcfd061',
-                                           'timezone': 'UTC', 'sitegroup_ids': []})
+                            {'name': 'TestSite', 'address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
+                             'latlng': {'lat': 50.727350349999995, 'lng': -3.4744726127760086}, 'country_code': 'GB',
+                             'rftemplate_id': '8542a5fa-51e4-41be-83b9-acb416362cc0',
+                             'networktemplate_id': '46b87163-abd2-4b08-a67f-1ccecfcfd061', 'timezone': 'Europe/London',
+                             'sitegroup_ids': []}
+        )
 
     def test_juniper_script_missing_site_group_ids(self):
         with self.assertRaises(ValueError) as cm:
-            juniper_script([], org_id='your_org_id', mist_login_method='token')
+            juniper_script_site_creation([], org_id='your_org_id', mist_login_method='token')
 
         self.assertEqual(str(cm.exception),
                          'Must provide site_group_ids for GovWifi & MoJWifi')
@@ -58,7 +55,7 @@ class TestJuniperScript(unittest.TestCase):
     def test_juniper_script_missing_rf_template_id(self):
         # Test when rf_template_id is missing
         with self.assertRaises(ValueError) as cm:
-            juniper_script([],
+            juniper_script_site_creation([],
                            org_id='your_org_id',
                            mist_login_method='token',
                            site_group_ids={
@@ -108,7 +105,7 @@ class TestJuniperScript(unittest.TestCase):
     def test_juniper_script_missing_network_template_id(self):
         # Test when network_template_id is missing
         with self.assertRaises(ValueError) as cm:
-            juniper_script([],
+            juniper_script_site_creation([],
                            org_id='your_org_id',
                            mist_login_method='token',
                            site_group_ids={
@@ -119,12 +116,12 @@ class TestJuniperScript(unittest.TestCase):
 
         self.assertEqual(str(cm.exception), 'Must define network_template_id')
 
-    @patch('src.juniper.plan_of_action')
-    @patch('src.juniper.JuniperClient')
+    @patch('src.juniper_site_creation.plan_of_action')
+    @patch('src.juniper_site_creation.JuniperClient')
     def test_given_mist_login_method_not_defined_then_default_to_credentials(self, mock_admin, mock_plan_of_action):
         output_buffer = StringIO()
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            juniper_script([],
+            juniper_script_site_creation([],
                            org_id='your_org_id',
                            site_group_ids={
                                'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
@@ -143,53 +140,47 @@ class TestJuniperScript(unittest.TestCase):
     def test_juniper_script_missing_org_id(self):
         # Test when org_id is missing
         with self.assertRaises(ValueError) as cm:
-            juniper_script([], org_id=None)
+            juniper_script_site_creation([], org_id=None)
 
         self.assertEqual(str(cm.exception), 'Please provide Mist org_id')
 
+class TestAddGeocodingToJson(unittest.TestCase):
 
-class TestPlanOfActionFunction(unittest.TestCase):
+    @patch('src.juniper_site_creation.geocode', side_effect=[
+        {'latitude': 50.3868633, 'longitude': -4.1539256},
+        {'latitude': 51.499929300000005, 'longitude': -0.13477761285315926},
+        {'latitude': 50.727350349999995, 'longitude': -3.4744726127760086},
+    ])
+    @patch('src.juniper_site_creation.find_country_code', return_value='GB')
+    @patch('src.juniper_site_creation.find_timezone', return_value='Europe/London')
+    def test_given_site_name_and_site_address_in_json_format_when_function_called_then_add_geocode_country_code_and_time_zone(
+            self,
+            find_timezone,
+            mock_find_country_code,
+            mock_geocode
+    ):
+        # Test if the function adds geocoding information correctly
+        data = [
+            {'Site Name': 'Site1', 'Site Address': '40 Mayflower Dr, Plymouth PL2 3DG'},
+            {'Site Name': 'Site2', 'Site Address': '102 Petty France, London SW1H 9AJ'},
+            {'Site Name': 'Site3',
+             'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB'}
+        ]
 
-    @patch("src.juniper.BuildPayload")
-    def test_plan_of_action_creates_file(self, mock_payload_processor):
+        expected_data = [
+            {'Site Name': 'Site1', 'Site Address': '40 Mayflower Dr, Plymouth PL2 3DG', 'gps': {
+                'latitude': 50.3868633, 'longitude': -4.1539256}, 'country_code': 'GB', 'time_zone': 'Europe/London'},
+            {'Site Name': 'Site2', 'Site Address': '102 Petty France, London SW1H 9AJ', 'gps': {
+                'latitude': 51.499929300000005, 'longitude': -0.13477761285315926}, 'country_code': 'GB',
+             'time_zone': 'Europe/London'},
+            {'Site Name': 'Site3', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'gps': {
+                'latitude': 50.727350349999995, 'longitude': -3.4744726127760086}, 'country_code': 'GB',
+             'time_zone': 'Europe/London'}
+        ]
 
-        # Mocking the payload processor
-        mock_processor_instance = mock_payload_processor.return_value
-        mock_processor_instance.get_site_payload.return_value = {
-            "hello": "test"}
+        actual_data = add_geocoding_to_json(data)
 
-        with patch('builtins.input', return_value='Y'), patch('sys.exit') as mock_exit:
-            plan_of_action(mock_processor_instance)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        expected_file_name = f"../data_src/mist_plan_{timestamp}.json"
-        self.assertTrue(os.path.exists(expected_file_name))
-        os.remove(expected_file_name)
-
-    @patch("src.juniper.BuildPayload")
-    @patch("builtins.open")
-    def test_plan_of_action_exit_on_no(self, mock_open_file, mock_payload_processor):
-
-        # Mocking the payload processor
-        mock_processor_instance = mock_payload_processor.return_value
-        mock_processor_instance.get_site_payload.return_value = {
-            "hello": "test"}
-
-        with patch('builtins.input', return_value='N'), self.assertRaises(SystemExit) as cm:
-            plan_of_action(mock_processor_instance)
-        self.assertEqual(cm.exception.code, 0)
-
-    @patch("src.juniper.BuildPayload")
-    @patch("builtins.open")
-    def test_plan_of_action_invalid_input(self, mock_open_file, mock_payload_processor):
-
-        # Mocking the payload processor
-        mock_processor_instance = mock_payload_processor.return_value
-        mock_processor_instance.get_site_payload.return_value = {
-            "hello": "test"}
-
-        # Mocking the built-in input
-        with patch('builtins.input', return_value='invalid_input'):
-            with self.assertRaises(ValueError) as cm:
-                plan_of_action(mock_processor_instance)
-
-        self.assertEqual(str(cm.exception), 'Invalid input')
+        self.assertEqual(actual_data, expected_data)
+        find_timezone.assert_called()
+        mock_find_country_code.assert_called()
+        mock_geocode.assert_called()

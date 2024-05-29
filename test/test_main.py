@@ -1,9 +1,7 @@
+from src.main import convert_csv_to_json
 import unittest
 import tempfile
 import csv
-from unittest.mock import patch
-from src.main import convert_csv_to_json, add_geocoding_to_json
-
 
 class TestCsvToJson(unittest.TestCase):
 
@@ -89,45 +87,3 @@ class TestCsvToJson(unittest.TestCase):
         expected_json = self.csv_data
         actual_json = convert_csv_to_json(csv_file.name)
         self.assertEqual(actual_json, expected_json)
-
-
-class TestAddGeocodingToJson(unittest.TestCase):
-
-    @patch('src.main.geocode', side_effect=[
-        {'latitude': 50.3868633, 'longitude': -4.1539256},
-        {'latitude': 51.499929300000005, 'longitude': -0.13477761285315926},
-        {'latitude': 50.727350349999995, 'longitude': -3.4744726127760086},
-    ])
-    @patch('src.main.find_country_code', return_value='GB')
-    @patch('src.main.find_timezone', return_value='Europe/London')
-    def test_given_site_name_and_site_address_in_json_format_when_function_called_then_add_geocode_country_code_and_time_zone(
-            self,
-            find_timezone,
-            mock_find_country_code,
-            mock_geocode
-    ):
-        # Test if the function adds geocoding information correctly
-        data = [
-            {'Site Name': 'Site1', 'Site Address': '40 Mayflower Dr, Plymouth PL2 3DG'},
-            {'Site Name': 'Site2', 'Site Address': '102 Petty France, London SW1H 9AJ'},
-            {'Site Name': 'Site3',
-             'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB'}
-        ]
-
-        expected_data = [
-            {'Site Name': 'Site1', 'Site Address': '40 Mayflower Dr, Plymouth PL2 3DG', 'gps': {
-                'latitude': 50.3868633, 'longitude': -4.1539256}, 'country_code': 'GB', 'time_zone': 'Europe/London'},
-            {'Site Name': 'Site2', 'Site Address': '102 Petty France, London SW1H 9AJ', 'gps': {
-                'latitude': 51.499929300000005, 'longitude': -0.13477761285315926}, 'country_code': 'GB',
-             'time_zone': 'Europe/London'},
-            {'Site Name': 'Site3', 'Site Address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB', 'gps': {
-                'latitude': 50.727350349999995, 'longitude': -3.4744726127760086}, 'country_code': 'GB',
-             'time_zone': 'Europe/London'}
-        ]
-
-        actual_data = add_geocoding_to_json(data)
-
-        self.assertEqual(actual_data, expected_data)
-        find_timezone.assert_called()
-        mock_find_country_code.assert_called()
-        mock_geocode.assert_called()

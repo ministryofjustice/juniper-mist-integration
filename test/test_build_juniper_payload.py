@@ -1,7 +1,9 @@
-from src.build_juniper_payload import BuildPayload
+from src.build_juniper_payload import BuildPayload, plan_of_action
 import unittest
 from unittest.mock import patch
 import json
+from datetime import datetime
+import os
 
 
 class TestBuildPayLoad(unittest.TestCase):
@@ -253,3 +255,37 @@ class TestCheckIfNeedToAppend(unittest.TestCase):
         result = self.payload_processor._check_if_we_need_to_append_gov_wifi_or_moj_wifi_site_groups(
             gov_wifi, moj_wifi, self.site_group_ids)
         self.assertEqual(result, [])
+
+class TestPlanOfActionFunction(unittest.TestCase):
+
+
+    def test_plan_of_action_creates_file(self):
+
+        json_payload = {"Hello": "hi"}
+
+        with patch('builtins.input', return_value='Y'), patch('sys.exit') as mock_exit:
+            plan_of_action(json_payload)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        expected_file_name = f"../data_src/mist_plan_{timestamp}.json"
+        self.assertTrue(os.path.exists(expected_file_name))
+        os.remove(expected_file_name)
+
+    @patch("builtins.open")
+    def test_plan_of_action_exit_on_no(self, mock_open_file):
+        json_payload = {"Hello": "hi"}
+
+        with patch('builtins.input', return_value='N'), self.assertRaises(SystemExit) as cm:
+            plan_of_action(json_payload)
+        self.assertEqual(cm.exception.code, 0)
+
+
+    @patch("builtins.open")
+    def test_plan_of_action_invalid_input(self, mock_open_file):
+        json_payload = {"Hello": "hi"}
+
+        # Mocking the built-in input
+        with patch('builtins.input', return_value='invalid_input'):
+            with self.assertRaises(ValueError) as cm:
+                plan_of_action(json_payload)
+
+        self.assertEqual(str(cm.exception), 'Invalid input')

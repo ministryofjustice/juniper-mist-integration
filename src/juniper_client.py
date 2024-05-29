@@ -90,3 +90,21 @@ class JuniperClient:
             return False
 
         return json.loads(response.text)
+
+    def get(self, url):
+        url = 'https://api.eu.mist.com{}'.format(url)
+        session = self.session
+        headers = self.headers
+
+        print('GET {}'.format(url))
+        response = session.get(url, headers=headers)
+
+        if response.status_code != 200:
+            print('Failed to GET')
+            print('\tURL: {}'.format(url))
+            print('\tResponse: {} ({})'.format(
+                response.text, response.status_code))
+            return False
+
+        return json.loads(response.text)
+
