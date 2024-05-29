@@ -256,8 +256,8 @@ class TestCheckIfNeedToAppend(unittest.TestCase):
             gov_wifi, moj_wifi, self.site_group_ids)
         self.assertEqual(result, [])
 
-class TestPlanOfActionFunction(unittest.TestCase):
 
+class TestPlanOfActionFunction(unittest.TestCase):
 
     def test_plan_of_action_creates_file(self):
 
@@ -277,7 +277,6 @@ class TestPlanOfActionFunction(unittest.TestCase):
         with patch('builtins.input', return_value='N'), self.assertRaises(SystemExit) as cm:
             plan_of_action(json_payload)
         self.assertEqual(cm.exception.code, 0)
-
 
     @patch("builtins.open")
     def test_plan_of_action_invalid_input(self, mock_open_file):

@@ -14,7 +14,8 @@ def validate_if_site_defined_on_csv_exists_in_mist(mist_sites_configs: list['dic
 
     for site_name in mist_site_names_csv_file:
         if site_name not in mist_site_names:
-            raise ValueError(f"Site name '{site_name}' found in CSV file but not in mist site configurations.")
+            raise ValueError(
+                f"Site name '{site_name}' found in CSV file but not in mist site configurations.")
 
 
 def validate_if_ap_defined_on_csv_exists_in_mist(mist_inventory: list['dict'],
@@ -31,7 +32,8 @@ def validate_if_ap_defined_on_csv_exists_in_mist(mist_inventory: list['dict'],
 
     for site_name in ap_mac_addresses_from_csv:
         if site_name not in ap_mac_addresses_from_mist:
-            raise ValueError(f"Site name '{site_name}' found in CSV file but not in mist site configurations.")
+            raise ValueError(
+                f"Site name '{site_name}' found in CSV file but not in mist site configurations.")
 
 
 def find_site_by_name(site_name: str,
@@ -73,7 +75,7 @@ def format_site_and_mac_reservations(ap_csv: list['dict']
 def find_site_id(
         site_and_mac_reservations_without_mist_site_ids: list['dict'],
         mist_sites_configs: list['dict']
-        ) -> list['dict']:
+) -> list['dict']:
 
     for site_csv in site_and_mac_reservations_without_mist_site_ids:
         site_found = False
@@ -83,14 +85,15 @@ def find_site_id(
                 site_found = True
                 break
         if not site_found:
-            raise ValueError(f"No matching site_id found for site: {site_csv['SiteName']}")
+            raise ValueError(
+                f"No matching site_id found for site: {site_csv['SiteName']}")
 
     return site_and_mac_reservations_without_mist_site_ids
 
 
 def get_site_payload_for_inventory_assign_to_site(
         site_and_mac_reservations_including_mist_site_ids: list['dict']
-        ) -> list['dict']:
+) -> list['dict']:
     payload = []
 
     for site in site_and_mac_reservations_including_mist_site_ids:
@@ -109,6 +112,7 @@ def get_site_payload_for_inventory_assign_to_site(
 
     return payload
 
+
 def rename_ap(admin: object,
               site_id: str,
               ap_id: str,
@@ -120,16 +124,18 @@ def rename_ap(admin: object,
     else:
         print('Successfully renamed ap to new desired name {}'.format(new_ap_name))
 
+
 def build_rename_ap_payload(
         inventory_payloads: list['dict'],
         mist_inventory: list['dict'],
         ap_csv: list['dict']
-        ) -> list['dict']:
+) -> list['dict']:
     payload = []
 
     for site in inventory_payloads:
         for mac in site['macs']:
-            inventory_item = find_inventory_item_by_mac_address(mist_inventory, mac)
+            inventory_item = find_inventory_item_by_mac_address(
+                mist_inventory, mac)
             csv_item = find_csv_item_by_mac_address(ap_csv, mac)
             payload.append(
                 {
@@ -141,23 +147,26 @@ def build_rename_ap_payload(
 
     return payload
 
+
 def find_inventory_item_by_mac_address(
         mist_inventory: list['dict'],
         mac: str
-        ) -> dict:
+) -> dict:
     for item in mist_inventory:
         if item['mac'] == mac:
             return item
     raise ValueError(f"Unable to find item with Mac Address: '{mac}'")
 
+
 def find_csv_item_by_mac_address(
         ap_csv: list['dict'],
         mac: str
-        ) -> list[dict]:
+) -> list[dict]:
     for item in ap_csv:
         if item['MAC Address'].replace(":", "") == mac:
             return item
-    raise ValueError(f"Unable to find item name with Mac Address: '{mac}' in csv")
+    raise ValueError(
+        f"Unable to find item name with Mac Address: '{mac}' in csv")
 
 
 def juniper_ap_assign(
@@ -182,18 +191,21 @@ def juniper_ap_assign(
         mist_sites_configs
     )
 
-    inventory_payloads = get_site_payload_for_inventory_assign_to_site(site_and_mac_reservations_including_mist_site_ids)
+    inventory_payloads = get_site_payload_for_inventory_assign_to_site(
+        site_and_mac_reservations_including_mist_site_ids)
 
     plan_of_action(inventory_payloads)
 
     for site_payload in inventory_payloads:
-        result = admin.put('/api/v1/orgs/' + org_id + '/inventory', site_payload)
+        result = admin.put('/api/v1/orgs/' + org_id +
+                           '/inventory', site_payload)
         if result == False:
             print('Failed to assign ap {}'.format(site_payload))
         else:
             print('Successfully assigned ap {}'.format(site_payload))
 
-    rename_ap_payload = build_rename_ap_payload(inventory_payloads,mist_inventory, ap_csv)
+    rename_ap_payload = build_rename_ap_payload(
+        inventory_payloads, mist_inventory, ap_csv)
     plan_of_action(rename_ap_payload)
 
     for ap_item in rename_ap_payload:

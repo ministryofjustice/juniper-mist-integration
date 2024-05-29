@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 from src.juniper_client import JuniperClient
 
+
 class TestJuniperClient(unittest.TestCase):
 
     # Mocking the input function to provide a static MFA code

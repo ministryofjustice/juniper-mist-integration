@@ -107,4 +107,3 @@ class JuniperClient:
             return False
 
         return json.loads(response.text)
-

@@ -6,6 +6,7 @@ from io import StringIO
 import pytest
 from parameterized import parameterized
 
+
 class TestJuniperScript(unittest.TestCase):
 
     @patch('src.juniper_site_creation.plan_of_action')
@@ -38,16 +39,17 @@ class TestJuniperScript(unittest.TestCase):
         )
 
         mock_post.assert_called_once_with('/api/v1/orgs/your_org_id/sites',
-                            {'name': 'TestSite', 'address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
-                             'latlng': {'lat': 50.727350349999995, 'lng': -3.4744726127760086}, 'country_code': 'GB',
-                             'rftemplate_id': '8542a5fa-51e4-41be-83b9-acb416362cc0',
-                             'networktemplate_id': '46b87163-abd2-4b08-a67f-1ccecfcfd061', 'timezone': 'Europe/London',
-                             'sitegroup_ids': []}
-        )
+                                          {'name': 'TestSite', 'address': 'Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB',
+                                           'latlng': {'lat': 50.727350349999995, 'lng': -3.4744726127760086}, 'country_code': 'GB',
+                                              'rftemplate_id': '8542a5fa-51e4-41be-83b9-acb416362cc0',
+                                              'networktemplate_id': '46b87163-abd2-4b08-a67f-1ccecfcfd061', 'timezone': 'Europe/London',
+                                              'sitegroup_ids': []}
+                                          )
 
     def test_juniper_script_missing_site_group_ids(self):
         with self.assertRaises(ValueError) as cm:
-            juniper_script_site_creation([], org_id='your_org_id', mist_login_method='token')
+            juniper_script_site_creation(
+                [], org_id='your_org_id', mist_login_method='token')
 
         self.assertEqual(str(cm.exception),
                          'Must provide site_group_ids for GovWifi & MoJWifi')
@@ -56,13 +58,13 @@ class TestJuniperScript(unittest.TestCase):
         # Test when rf_template_id is missing
         with self.assertRaises(ValueError) as cm:
             juniper_script_site_creation([],
-                           org_id='your_org_id',
-                           mist_login_method='token',
-                           site_group_ids={
-                               'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
-                               'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
-                           network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
-                           )
+                                         org_id='your_org_id',
+                                         mist_login_method='token',
+                                         site_group_ids={
+                'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+                'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
+                network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
+            )
 
         self.assertEqual(str(cm.exception), 'Must define rf_template_id')
 
@@ -106,13 +108,13 @@ class TestJuniperScript(unittest.TestCase):
         # Test when network_template_id is missing
         with self.assertRaises(ValueError) as cm:
             juniper_script_site_creation([],
-                           org_id='your_org_id',
-                           mist_login_method='token',
-                           site_group_ids={
-                               'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
-                               'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
-                           rf_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
-                           )
+                                         org_id='your_org_id',
+                                         mist_login_method='token',
+                                         site_group_ids={
+                'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+                'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
+                rf_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061'
+            )
 
         self.assertEqual(str(cm.exception), 'Must define network_template_id')
 
@@ -122,16 +124,16 @@ class TestJuniperScript(unittest.TestCase):
         output_buffer = StringIO()
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
             juniper_script_site_creation([],
-                           org_id='your_org_id',
-                           site_group_ids={
-                               'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
-                               'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
-                           rf_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061',
-                           network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061',
-                           mist_login_method=None,
-                           ap_versions={"AP45": "0.12.27139",
-                                        "AP32": "0.12.27139"}
-                           )
+                                         org_id='your_org_id',
+                                         site_group_ids={
+                'moj_wifi': '0b33c61d-8f51-4757-a14d-29263421a904',
+                'gov_wifi': '70f3e8af-85c3-484d-8d90-93e28b911efb'},
+                rf_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061',
+                network_template_id='46b87163-abd2-4b08-a67f-1ccecfcfd061',
+                mist_login_method=None,
+                ap_versions={"AP45": "0.12.27139",
+                             "AP32": "0.12.27139"}
+            )
             actual_output = mock_stdout.getvalue()
         expected_message = "mist_login_method not defined. Defaulting to credentials"
         self.assertIn(expected_message, actual_output,
@@ -143,6 +145,7 @@ class TestJuniperScript(unittest.TestCase):
             juniper_script_site_creation([], org_id=None)
 
         self.assertEqual(str(cm.exception), 'Please provide Mist org_id')
+
 
 class TestAddGeocodingToJson(unittest.TestCase):
 

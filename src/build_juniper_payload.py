@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 import sys
 
+
 class BuildPayload:
     def __init__(self,
                  data: list,
@@ -221,6 +222,7 @@ class BuildPayload:
             json_objects.append(site_dict)
 
         return json_objects
+
 
 def plan_of_action(
     processed_payload

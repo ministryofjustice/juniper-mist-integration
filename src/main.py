@@ -34,7 +34,8 @@ if __name__ == '__main__':
     operation = os.environ.get('OPERATION')
 
     if operation is None:
-        raise EnvironmentError("The OPERATION environment variable is not set.")
+        raise EnvironmentError(
+            "The OPERATION environment variable is not set.")
 
     if operation == "site_creation":
         juniper_script_site_creation(
@@ -56,5 +57,3 @@ if __name__ == '__main__':
         )
     else:
         raise ValueError(f"The OPERATION '{operation}' is not recognized.")
-
-
