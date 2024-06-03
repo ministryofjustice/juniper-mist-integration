@@ -7,7 +7,7 @@ import csv
 # Convert CSV file to JSON object.
 def convert_csv_to_json(file_path):
     csv_rows = []
-    with open(file_path) as csvfile:
+    with open(file_path, encoding="ISO-8859-1") as csvfile:
         reader = csv.DictReader(csvfile, skipinitialspace=True, quotechar='"')
 
         # Here we clean any Non-breaking spaces and convert to normal spacing. \xa0 converts to ' '
