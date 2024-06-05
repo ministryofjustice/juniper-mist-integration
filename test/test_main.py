@@ -87,4 +87,4 @@ class TestCsvToJson(unittest.TestCase):
 
         expected_json = self.csv_data
         actual_json = convert_csv_to_json(csv_file.name)
-        self.assertEqual(actual_json, expected_json)
+        self.assertEqual(expected_json, actual_json)
