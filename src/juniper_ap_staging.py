@@ -23,17 +23,19 @@ def validate_if_ap_defined_on_csv_exists_in_mist(mist_inventory: list['dict'],
     ap_mac_addresses_from_mist = []
     for inventory_item in mist_inventory:
         if inventory_item['type'] == 'ap':
-            ap_mac_addresses_from_mist.append(inventory_item['mac'])
+            ap_mac_addresses_from_mist.append(inventory_item['mac'].upper())
 
     ap_mac_addresses_from_csv = []
     for ap_row in ap_csv:
         cleaned_mac_address = ap_row['MAC Address'].replace(":", "")
         ap_mac_addresses_from_csv.append(cleaned_mac_address)
 
-    for site_name in ap_mac_addresses_from_csv:
-        if site_name not in ap_mac_addresses_from_mist:
+    for ap_mac_address in ap_mac_addresses_from_csv:
+        if ap_mac_address in ap_mac_addresses_from_mist:
+            continue
+        else:
             raise ValueError(
-                f"Site name '{site_name}' found in CSV file but not in mist site configurations.")
+                f"AP Mac address '{ap_mac_address}' found in CSV file but not on mist inventory.")
 
 
 def find_site_by_name(site_name: str,
