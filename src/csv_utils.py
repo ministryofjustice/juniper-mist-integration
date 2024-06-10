@@ -1,4 +1,6 @@
 import csv
+
+
 def convert_csv_to_json(file_path):
     csv_rows = []
     with open(file_path, encoding='utf-8', errors='ignore') as csvfile:
