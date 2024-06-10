@@ -1,35 +1,13 @@
 from juniper_site_creation import juniper_script_site_creation
 from juniper_ap_staging import juniper_ap_assign
 import os
-import csv
-
-
-# Convert CSV file to JSON object.
-def convert_csv_to_json(file_path):
-    csv_rows = []
-    with open(file_path, encoding="ISO-8859-1") as csvfile:
-        reader = csv.DictReader(csvfile, skipinitialspace=True, quotechar='"')
-
-        # Here we clean any Non-breaking spaces and convert to normal spacing. \xa0 converts to ' '
-        for row in reader:
-            temp_overwritable_dict = {}
-            for key, value in row.items():
-                cleaned_key = key.replace('\xa0', ' ')
-                cleaned_value = value.replace('\xa0', ' ')
-                temp_overwritable_dict.update({cleaned_key: cleaned_value})
-            csv_rows.append(temp_overwritable_dict)
-
-    if csv_rows == None or csv_rows == []:
-        raise ValueError('Failed to convert CSV file to JSON. Exiting script.')
-    return csv_rows
-
+import csv_utils
 
 if __name__ == '__main__':
 
     csv_file_path = os.getcwd() + '/../data_src/' + os.environ.get('CSV_FILE_NAME')
 
-    # Convert CSV to valid JSON
-    json_data = convert_csv_to_json(csv_file_path)
+    json_data = csv_utils.convert_csv_to_json(csv_file_path)
 
     operation = os.environ.get('OPERATION')
 
