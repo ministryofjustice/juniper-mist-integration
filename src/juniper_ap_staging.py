@@ -137,7 +137,7 @@ def build_rename_ap_payload(
     for site in inventory_payloads:
         for mac in site['macs']:
             inventory_item = find_inventory_item_by_mac_address(
-                mist_inventory, mac)
+                mist_inventory, mac.lower())
             csv_item = find_csv_item_by_mac_address(ap_csv, mac)
             payload.append(
                 {
