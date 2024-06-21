@@ -147,11 +147,13 @@ def build_rename_ap_payload(
 
     return payload
 
+
 def find_value_in_list_of_dicts(list_of_dicts, key, value):
     for dictionary in list_of_dicts:
         if dictionary.get(key) == value:
             return dictionary
-    raise ValueError(f"Value '{value}' not found for key '{key}' in the list of dictionaries.")
+    raise ValueError(
+        f"Value '{value}' not found for key '{key}' in the list of dictionaries.")
 
 
 def find_inventory_item_by_mac_address(
@@ -171,11 +173,12 @@ def find_csv_item_by_mac_address(
         mac: str
 ) -> list[dict]:
 
-        try:
-            result = find_value_in_list_of_dicts(ap_csv, "MAC Address", mac.upper())
-            return result
-        except ValueError as e:
-            print(e)
+    try:
+        result = find_value_in_list_of_dicts(
+            ap_csv, "MAC Address", mac.upper())
+        return result
+    except ValueError as e:
+        print(e)
 
 
 def juniper_ap_assign(
