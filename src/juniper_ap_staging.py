@@ -60,13 +60,13 @@ def format_site_and_mac_reservations(ap_csv: list['dict']
         if existing_site:
             # Update the mac_addresses field by appending the new MAC address
             if mac_address not in existing_site["mac_addresses"]:
-                existing_site["mac_addresses"] += f",{mac_address}"
+                existing_site["mac_addresses"].append(mac_address.lower())
         else:
             # Create a new dictionary with the desired keys and values
             new_item = {
                 ""
                 "SiteName": site_name,
-                "mac_addresses": mac_address
+                "mac_addresses": [mac_address.lower()]
             }
             # Append the new dictionary to the output list
             site_and_mac_reservations.append(new_item)
@@ -103,9 +103,7 @@ def get_site_payload_for_inventory_assign_to_site(
             {
                 "op": "assign",
                 "site_id": site['site_id'],
-                "macs": [
-                    site['mac_addresses']
-                ],
+                "macs": site['mac_addresses'],
                 "no_reassign": False,
                 "disable_auto_config": False,
                 "managed": False
@@ -137,7 +135,7 @@ def build_rename_ap_payload(
     for site in inventory_payloads:
         for mac in site['macs']:
             inventory_item = find_inventory_item_by_mac_address(
-                mist_inventory, mac.lower())
+                mist_inventory, mac)
             csv_item = find_csv_item_by_mac_address(ap_csv, mac)
             payload.append(
                 {
@@ -150,25 +148,37 @@ def build_rename_ap_payload(
     return payload
 
 
+def find_value_in_list_of_dicts(list_of_dicts, key, value):
+    for dictionary in list_of_dicts:
+        if dictionary.get(key) == value:
+            return dictionary
+    raise ValueError(
+        f"Value '{value}' not found for key '{key}' in the list of dictionaries.")
+
+
 def find_inventory_item_by_mac_address(
         mist_inventory: list['dict'],
         mac: str
 ) -> dict:
-    for item in mist_inventory:
-        if item['mac'] == mac:
-            return item
-    raise ValueError(f"Unable to find item with Mac Address: '{mac}'")
+
+    try:
+        result = find_value_in_list_of_dicts(mist_inventory, "mac", mac)
+        return result
+    except ValueError as e:
+        print(e)
 
 
 def find_csv_item_by_mac_address(
         ap_csv: list['dict'],
         mac: str
 ) -> list[dict]:
-    for item in ap_csv:
-        if item['MAC Address'].replace(":", "") == mac:
-            return item
-    raise ValueError(
-        f"Unable to find item name with Mac Address: '{mac}' in csv")
+
+    try:
+        result = find_value_in_list_of_dicts(
+            ap_csv, "MAC Address", mac.upper())
+        return result
+    except ValueError as e:
+        print(e)
 
 
 def juniper_ap_assign(
