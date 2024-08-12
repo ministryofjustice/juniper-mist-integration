@@ -54,8 +54,16 @@ Within Docker Desktop Cog --> Resources --> File Sharing --> add `/Users/$YOURUS
 
 6. Copy this in your terminal and paste to download and run the Dockerized tooling:
 
+Linux users:
+
 ```
 docker pull ghcr.io/ministryofjustice/nvvs/juniper-mist-integration/app:latest; docker run -it -v ./data_src:/data_src --env-file .env ghcr.io/ministryofjustice/nvvs/juniper-mist-integration/app:latest
+```
+
+Windows Users:
+
+```
+docker pull ghcr.io/ministryofjustice/nvvs/juniper-mist-integration/app:latest; docker run -it -v .\data_src:/data_src --env-file .env ghcr.io/	ministryofjustice/nvvs/juniper-mist-integration/app:latest
 ```
 
 ## Development setup
