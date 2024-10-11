@@ -31,7 +31,7 @@ def validate_if_ap_defined_on_csv_exists_in_mist(mist_inventory: list['dict'],
         ap_mac_addresses_from_csv.append(cleaned_mac_address)
 
     for ap_mac_address in ap_mac_addresses_from_csv:
-        if ap_mac_address in ap_mac_addresses_from_mist:
+        if ap_mac_address.upper() in ap_mac_addresses_from_mist:
             continue
         else:
             raise ValueError(
